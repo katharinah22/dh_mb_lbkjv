@@ -50,6 +50,7 @@ def process_file(file):
     p_title = re.compile('>.* \(')
     p_image = re.compile('data-src=".*\.(jpg|gif)"')
     p_imdb_imgid = re.compile('<a href="http://www\.imdb\.com/title/tt\d{6,10}/">')
+    # p_imdb_imgid = re.compile('www\.imdb\.com/title/tt\d{6,10}/">')
 
     # Creates connection
     client = MongoClient()
@@ -86,12 +87,33 @@ def process_file(file):
             l_urlforimdb = 'http://moviebarcode.tumblr.com/post/' + l_post_id
             imdb_flag = 0       # =0 :Search by imdb-id at omdb-api
                                 # =1 :Search by title at omdb-api
+#            try:
+#                l_imdb_imgid = urllib.request.urlopen(l_urlforimdb)
+#                str_imdb_imgid = l_imdb_imgid.read().decode('utf-8')
+#
+#            except Exception:
+#               imdb_flag = 1
+#                pass
+
+            t1 = requests.head(l_urlforimdb)
+            bytes = t1.headers['location']
+            # debugKH("vor Encode:", bytes)
+            l_urlforimdb = urlEncodeNonAscii(bytes)
+
             try:
                 l_imdb_imgid = urllib.request.urlopen(l_urlforimdb)
-                str_imdb_imgid = l_imdb_imgid.read().decode('utf-8')
-            except Exception:
+                try:
+                    bstr_imdb_imgid = l_imdb_imgid.read()
+                except Exception as e:
+                    print('*****************************Exception beim read()', e)
+                print(bstr_imdb_imgid)
+                try:
+                    str_imdb_imgid = bstr_imdb_imgid.decode('utf-8')
+                except Exception as e:
+                    print('***************************Exception beim decode()', e)
+            except Exception as e:
+                print('*********************************************Exception', e)
                 imdb_flag = 1
-                pass
 
             # set default
             l_actors = ""
@@ -118,10 +140,10 @@ def process_file(file):
                     l_actors, l_country, l_director, l_writer, l_genre, l_language, l_released, \
                     l_runtime, l_plot, l_imdb_rating = objdata_to_db(obj)
             else:
-                l_imdbid = "No IMDb-Id found!"
+                l_imdbid = "No IMDb-Id!"
                 imdb_flag = 1
 
-            debugKH(l_imdbid + "\n")
+            debugKH(l_imdbid)
 
             if imdb_flag == 1:
                 # get IMDb data
@@ -156,10 +178,16 @@ def process_file(file):
                             l_director, l_writer, l_genre, l_language, l_released, l_runtime, l_plot,
                             l_imdb_rating)
 
+            print('\n')
+
+
+def urlEncodeNonAscii(b):
+    return re.sub('[\x80-\xFF]', lambda c: '%%%02x' % ord(c.group(0)), b)
+
 
 def get_movie_json(title):
     urlTitle = urllib.parse.quote_plus(title.replace('The Complete ', ''))
-    print("http://www.omdbapi.com/?t=" + urlTitle)
+    #print("http://www.omdbapi.com/?t=" + urlTitle)
     response = urlopen("http://www.omdbapi.com/?t=" + urlTitle).read().decode('utf8')
     obj = json.loads(response)
     return obj
@@ -187,60 +215,64 @@ def objdata_to_db(obj):
 
 def fill_collection(db, fs, l_post_id, l_imdbid, l_title, l_year, l_image, l_actors, l_country, l_director,
                     l_writer, l_genre, l_language, l_released, l_runtime, l_plot, l_imdb_rating):
-    if not fs.exists({"_id": l_post_id}):
-        fs.put(urllib.request.urlopen(l_image), _id=l_post_id, filename=l_image)
+    try:
+        if not fs.exists({"_id": l_post_id}):
+            fs.put(urllib.request.urlopen(l_image), _id=l_post_id, filename=l_image)
 
-    if db.movie.find_one({"_id": l_post_id}):
-        debugKH(l_post_id + "(bereits vorhanden)")
-        db.movie.update(
-            {"_id": l_post_id},
-            {
-                '$set': {"moviebarcode": "abc"}
-            },
-            upsert=False
-        )
-
-    else:
-        db.movie.insert_one(
-            {
-                "_id": l_post_id,
-                "imdb_id": l_imdbid,
-                "title": l_title,
-                "year": l_year,
-                "director": l_director,
-                "writer": l_writer,
-                "actors": l_actors,
-                "storyline":
-                    {
-                        "summary": l_plot,
-                        "taglines": "",
-                        "genre": l_genre,
-                        "certificate": "",
-                        "imdbrating": l_imdb_rating
-                    },
-                "details":
-                    {
-                        "country": l_country,
-                        "language": l_language,
-                        "releasedate": l_released,
-                        "filminglocations": ""
-                    },
-                "boxoffice":
-                    {
-                        "budget": "",
-                        "openingweekend": "",
-                        "gross": "",
-                        "productionco": ""
-                    },
-                "technicalspecs":
-                    {
-                        "runtime": l_runtime,
-                        "soundmix": "",
-                        "color": "",
-                        "aspectratio": ""
-                    }
-            }
-        )
+        if db.movie.find_one({"_id": l_post_id}):
+            debugKH(l_post_id + "(bereits vorhanden)")
+            ###
+            # db.movie.update(
+            #    {"_id": l_post_id},
+            #    {
+            #        '$set': {"moviebarcode": "abc"}
+            #    },
+            #    upsert=False
+            #)
+            ###
+        else:
+            db.movie.insert_one(
+                {
+                    "_id": l_post_id,
+                    "imdb_id": l_imdbid,
+                    "title": l_title,
+                    "year": l_year,
+                    "director": l_director,
+                    "writer": l_writer,
+                    "actors": l_actors,
+                    "storyline":
+                        {
+                            "summary": l_plot,
+                            "taglines": "",
+                            "genre": l_genre,
+                            "certificate": "",
+                            "imdbrating": l_imdb_rating
+                        },
+                    "details":
+                        {
+                            "country": l_country,
+                            "language": l_language,
+                            "releasedate": l_released,
+                            "filminglocations": ""
+                        },
+                    "boxoffice":
+                        {
+                            "budget": "",
+                            "openingweekend": "",
+                            "gross": "",
+                            "productionco": ""
+                        },
+                    "technicalspecs":
+                        {
+                            "runtime": l_runtime,
+                            "soundmix": "",
+                            "color": "",
+                            "aspectratio": ""
+                        }
+                }
+            )
+    except Exception as e:
+        print('******************************Exception beim fillcollection()', e)
 
 
 # commandline output katharina // ONLY TEST!
