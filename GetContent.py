@@ -8,6 +8,8 @@ __author__ = 'katharina hafner'
 #                   get metadata from omdb-api by id ( scrap tt_id from website
 #                   http://moviebarcode.tumble.com/post/xxxxxxxx); if there's no
 #                   hit, search film-metadata by title
+# 19,20,21/01/16    html-code of our source-website moviebarcodes.tumblr.com
+# #                 changed -> fitting code
 
 
 import urllib.parse
@@ -49,7 +51,9 @@ def process_file(file):
     p_year = re.compile('(\(\d{4}\)|\(\d{4}-\d{4}\))')
     p_title = re.compile('>.* \(')
     p_image = re.compile('data-src=".*\.(jpg|gif)"')
-    p_imdb_imgid = re.compile('<a href="http://www\.imdb\.com/title/tt\d{6,10}/">')
+    # p_imdb_imgid = re.compile('<a href="http://www\.imdb\.com/title/tt\d{6,10}/">') "before changes on Website
+    myString = "redirect\?z=http%3A%2F%2Fwww\.imdb\.com%2Ftitle%2Ftt\d{6,10}"
+    p_imdb_imgid = re.compile('www\.imdb\.com%2Ftitle%2Ftt\d{6,10}')
     # p_imdb_imgid = re.compile('www\.imdb\.com/title/tt\d{6,10}/">')
 
     # Creates connection
@@ -126,11 +130,17 @@ def process_file(file):
             l_runtime = ""
             l_plot = ""
             l_imdb_rating = ""
+            l_awards = ""
+            l_metascore = ""
+            l_imdb_votes = ""
+            l_type = ""
+            l_rated = ""
 
             # search for match in stringresult
             if imdb_flag == 0 and re.search(p_imdb_imgid, str_imdb_imgid):
                 # pattern matched
-                l_imdbid = (re.search(p_imdb_imgid, str_imdb_imgid).group(0)[35:-3])
+                # l_imdbid = (re.search(p_imdb_imgid, str_imdb_imgid).group(0)[35:-3])  "" changes Website
+                l_imdbid = (re.search(p_imdb_imgid, str_imdb_imgid).group(0)[23:])
                 # if imdb-id exists at moviebarcodes.tumblr.com/post/xxxxxxx  -> Search by ttxxxxxx at OMDbAPI
                 # no hit: search by title at omdb-api
                 obj = get_movie_json_by_id(l_imdbid)
@@ -138,13 +148,14 @@ def process_file(file):
                     imdb_flag = 1
                 else:
                     l_actors, l_country, l_director, l_writer, l_genre, l_language, l_released, \
-                    l_runtime, l_plot, l_imdb_rating = objdata_to_db(obj)
+                    l_runtime, l_plot, l_imdb_rating, l_awards, l_metascore, l_imdb_votes, \
+                    l_type, l_rated = objdata_to_db(obj)
             else:
                 l_imdbid = "No IMDb-Id!"
                 imdb_flag = 1
 
             debugKH(l_imdbid)
-
+            # Search Metadata by Titel
             if imdb_flag == 1:
                 # get IMDb data
                 titleSplit = []
@@ -168,15 +179,17 @@ def process_file(file):
 
                 if 'Error' not in obj:
                     l_actors, l_country, l_director, l_writer, l_genre, l_language, l_released, \
-                    l_runtime, l_plot, l_imdb_rating = objdata_to_db(obj)
+                    l_runtime, l_plot, l_imdb_rating, l_awards, l_metascore, l_imdb_votes, \
+                    l_type, l_rated = objdata_to_db(obj)
 
                 print(l_title, l_year, l_image, l_actors, l_country, l_director, l_writer, l_genre,
-                      l_language, l_released, l_runtime, l_plot, l_imdb_rating)
+                      l_language, l_released, l_runtime, l_plot, l_imdb_rating, l_awards, l_metascore,
+                      l_imdb_votes, l_type, l_rated)
 
             # fill mongodb
             fill_collection(db, fs, l_post_id, l_imdbid, l_title, l_year, l_image, l_actors, l_country,
                             l_director, l_writer, l_genre, l_language, l_released, l_runtime, l_plot,
-                            l_imdb_rating)
+                            l_imdb_rating, l_awards, l_metascore, l_imdb_votes, l_type, l_rated)
 
             print('\n')
 
@@ -210,67 +223,114 @@ def objdata_to_db(obj):
     l_runtime = obj['Runtime']
     l_plot = obj['Plot']
     l_imdb_rating = obj['imdbRating']
-    return l_actors, l_country, l_director, l_writer, l_genre, l_language, l_released, l_runtime, l_plot, l_imdb_rating
+    l_awards = obj['Awards']
+    l_metascore = obj['Metascore']
+    l_imdb_votes = obj['imdbVotes']
+    l_type = obj['Type']
+    l_rated = obj['Rated']
+    return l_actors, l_country, l_director, l_writer, l_genre, l_language, l_released,\
+           l_runtime, l_plot, l_imdb_rating, l_awards, l_metascore, l_imdb_votes, l_type, l_rated
 
 
-def fill_collection(db, fs, l_post_id, l_imdbid, l_title, l_year, l_image, l_actors, l_country, l_director,
-                    l_writer, l_genre, l_language, l_released, l_runtime, l_plot, l_imdb_rating):
+def fill_collection(db, fs, l_post_id, l_imdbid, l_title, l_year, l_image, l_actors,
+                    l_country, l_director, l_writer, l_genre, l_language, l_released,
+                    l_runtime, l_plot, l_imdb_rating, l_awards, l_metascore,
+                    l_imdb_votes, l_type, l_rated):
     try:
+        # saves JPG and GIF of MovieBarcodes in GridFS
         if not fs.exists({"_id": l_post_id}):
             fs.put(urllib.request.urlopen(l_image), _id=l_post_id, filename=l_image)
 
-        if db.movie.find_one({"_id": l_post_id}):
-            debugKH(l_post_id + "(bereits vorhanden)")
-            ###
-            # db.movie.update(
-            #    {"_id": l_post_id},
-            #    {
-            #        '$set': {"moviebarcode": "abc"}
-            #    },
-            #    upsert=False
-            #)
-            ###
+        # if l_title contains "The Complete ..."
+        # save series of movies (e.g. James Bond) in separate collection
+        p_serie = re.compile('The Complete.*')
+        if re.search(p_serie, l_title):
+            if db.movie.find_one({"_id": l_post_id}):
+                debugKH(l_post_id + "(bereits vorhanden)")
+                ##update collection serie
+            else:
+                # it's a serie of movies
+                debugKH("SERIE:" + l_title)
+                db.serie.insert_one(
+                    {
+                        "_id": l_post_id,
+                        "imdb_id": l_imdbid,
+                        "title": l_title,
+                        "year": l_year,
+                        "director": l_director,
+                        "writer": l_writer,
+                        "actors": l_actors,
+                        "storyline":
+                            {
+                                "summary": l_plot,
+                                "type": l_type,
+                                "genre": l_genre,
+                                "runtime": l_runtime,
+                                "imdbrating": l_imdb_rating,
+                                "imdbvotes": l_imdb_votes
+                            },
+                        "details":
+                            {
+                                "country": l_country,
+                                "language": l_language,
+                                "releasedate": l_released,
+                                "filminglocations": ""
+                            },
+                        "boxoffice":
+                            {
+                                "awards": l_awards,
+                                "metascore": l_metascore,
+                                "rated": l_rated
+                            }
+                    }
+                )
         else:
-            db.movie.insert_one(
-                {
-                    "_id": l_post_id,
-                    "imdb_id": l_imdbid,
-                    "title": l_title,
-                    "year": l_year,
-                    "director": l_director,
-                    "writer": l_writer,
-                    "actors": l_actors,
-                    "storyline":
-                        {
-                            "summary": l_plot,
-                            "taglines": "",
-                            "genre": l_genre,
-                            "certificate": "",
-                            "imdbrating": l_imdb_rating
-                        },
-                    "details":
-                        {
-                            "country": l_country,
-                            "language": l_language,
-                            "releasedate": l_released,
-                            "filminglocations": ""
-                        },
-                    "boxoffice":
-                        {
-                            "budget": "",
-                            "openingweekend": "",
-                            "gross": "",
-                            "productionco": ""
-                        },
-                    "technicalspecs":
-                        {
-                            "runtime": l_runtime,
-                            "soundmix": "",
-                            "color": "",
-                            "aspectratio": ""
-                        }
-                }
-            )
+
+            if db.movie.find_one({"_id": l_post_id}):
+                debugKH(l_post_id + "(bereits vorhanden)")
+                ###
+                # db.movie.update(
+                #    {"_id": l_post_id},
+                #    {
+                #        '$set': {"moviebarcode": "abc"}
+                #    },
+                #    upsert=False
+                #)
+                ###
+            else:
+                db.movie.insert_one(
+                    {
+                        "_id": l_post_id,
+                        "imdb_id": l_imdbid,
+                        "title": l_title,
+                        "year": l_year,
+                        "director": l_director,
+                        "writer": l_writer,
+                        "actors": l_actors,
+                        "storyline":
+                            {
+                                "summary": l_plot,
+                                "type": l_type,
+                                "genre": l_genre,
+                                "runtime": l_runtime,
+                                "imdbrating": l_imdb_rating,
+                                "imdbvotes": l_imdb_votes
+                            },
+                        "details":
+                            {
+                                "country": l_country,
+                                "language": l_language,
+                                "releasedate": l_released,
+                                "filminglocations": ""
+                            },
+                        "boxoffice":
+                            {
+                                "awards": l_awards,
+                                "metascore": l_metascore,
+                                "rated": l_rated
+                            }
+                    }
+                )
     except Exception as e:
         print('******************************Exception beim fillcollection()', e)
 
