@@ -245,7 +245,7 @@ def fill_collection(db, fs, l_post_id, l_imdbid, l_title, l_year, l_image, l_act
         # save series of movies (e.g. James Bond) in separate collection
         p_serie = re.compile('The Complete.*')
         if re.search(p_serie, l_title):
-            if db.movie.find_one({"_id": l_post_id}):
+            if db.serie.find_one({"_id": l_post_id}):
                 debugKH(l_post_id + "(bereits vorhanden)")
                 ##update collection serie
             else:
