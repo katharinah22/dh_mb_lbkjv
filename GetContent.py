@@ -10,6 +10,8 @@ __author__ = 'katharina hafner'
 #                   hit, search film-metadata by title
 # 19,20,21/01/16    html-code of our source-website moviebarcodes.tumblr.com
 # #                 changed -> fitting code
+# 23/01/16          get dominant colors with ColorThief from each imagefile
+#                   store in collections
 
 
 import urllib.parse
@@ -23,6 +25,9 @@ import re                            # Regular Expressions
 from pymongo import MongoClient      # NoSQL DB Framework
 import gridfs                        # Mongo DB Grid FS Bucket
 import json
+import colorthief as ct              # get dominate colors from image
+import webcolors                     # conversation rgb to hex
+
 try:
     from html import unescape  # python 3.4+
 except ImportError:
@@ -185,11 +190,14 @@ def process_file(file):
                 print(l_title, l_year, l_image, l_actors, l_country, l_director, l_writer, l_genre,
                       l_language, l_released, l_runtime, l_plot, l_imdb_rating, l_awards, l_metascore,
                       l_imdb_votes, l_type, l_rated)
-
+#            """
             # fill mongodb
             fill_collection(db, fs, l_post_id, l_imdbid, l_title, l_year, l_image, l_actors, l_country,
                             l_director, l_writer, l_genre, l_language, l_released, l_runtime, l_plot,
                             l_imdb_rating, l_awards, l_metascore, l_imdb_votes, l_type, l_rated)
+#            """
+            # get dominant colors of each moviebarcode-image
+            get_dominant_color(db, fs, l_post_id)
 
             print('\n')
 
@@ -333,6 +341,79 @@ def fill_collection(db, fs, l_post_id, l_imdbid, l_title, l_year, l_image, l_act
                 )
     except Exception as e:
         print('******************************Exception beim fillcollection()', e)
+
+
+def get_dominant_color(db, fs, l_post_id):
+    img_barcode = fs.get(l_post_id).read()
+    my_img = open("myMovieBarcode.jpg", "wb")
+    my_img.write(img_barcode)
+    my_img.close()
+
+    cot = ct.ColorThief("myMovieBarcode.jpg")
+    arr_domcol = cot.get_palette(11)    # 10 most dominant colors in picture
+
+    i = 0
+    arr_domcol_hex = []
+    for i in range(0, 10):
+        arr_domcol_hex.append(webcolors.rgb_to_hex(arr_domcol[i]))
+        i = i + 1
+    store_domcol_to_db(db, l_post_id, arr_domcol_hex)
+    debugKH(arr_domcol)
+
+
+def store_domcol_to_db(db, l_post_id, arr_domcol_hex):
+    if db.movie.find_one({"_id": l_post_id}):
+        debugKH("UPDATE" + l_post_id)
+        try:
+            db.movie.update(
+                {"_id": l_post_id},
+                {
+                    '$set': {"dominantColors":
+                                {
+                                    "1st": arr_domcol_hex[0],
+                                    "2nd": arr_domcol_hex[1],
+                                    "3rd": arr_domcol_hex[2],
+                                    "4th": arr_domcol_hex[3],
+                                    "5th": arr_domcol_hex[4],
+                                    "6th": arr_domcol_hex[5],
+                                    "7th": arr_domcol_hex[6],
+                                    "8th": arr_domcol_hex[7],
+                                    "9th": arr_domcol_hex[8],
+                                    "10th": arr_domcol_hex[9]
+                                }
+                    }
+                },
+                upsert=False
+            )
+        except Exception as e:
+            print(e)
+    elif db.serie.find_one({"_id": l_post_id}):
+        debugKH("UPDATE" + l_post_id)
+        try:
+            db.serie.update(
+                {"_id": l_post_id},
+                {
+                    '$set': {"dominantColors":
+                                {
+                                    "1st": arr_domcol_hex[0],
+                                    "2nd": arr_domcol_hex[1],
+                                    "3rd": arr_domcol_hex[2],
+                                    "4th": arr_domcol_hex[3],
+                                    "5th": arr_domcol_hex[4],
+                                    "6th": arr_domcol_hex[5],
+                                    "7th": arr_domcol_hex[6],
+                                    "8th": arr_domcol_hex[7],
+                                    "9th": arr_domcol_hex[8],
+                                    "10th": arr_domcol_hex[9]
+                                }
+                    }
+                },
+                upsert=False
+            )
+        except Exception as e:
+            print(e)
+    else:
+        print("no entry for ", l_post_id)
 
 
 # commandline output katharina // ONLY TEST!
