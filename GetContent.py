@@ -12,6 +12,8 @@ __author__ = 'katharina hafner'
 # #                 changed -> fitting code
 # 23/01/16          get dominant colors with ColorThief from each imagefile
 #                   store in collections
+# 27/01/16          fetching posters from omdb, storing at grid fs; changes
+#                   color thief
 
 
 import urllib.parse
@@ -140,6 +142,7 @@ def process_file(file):
             l_imdb_votes = ""
             l_type = ""
             l_rated = ""
+            l_poster = ""   # url for poster
 
             # search for match in stringresult
             if imdb_flag == 0 and re.search(p_imdb_imgid, str_imdb_imgid):
@@ -154,7 +157,7 @@ def process_file(file):
                 else:
                     l_actors, l_country, l_director, l_writer, l_genre, l_language, l_released, \
                     l_runtime, l_plot, l_imdb_rating, l_awards, l_metascore, l_imdb_votes, \
-                    l_type, l_rated = objdata_to_db(obj)
+                    l_type, l_rated, l_poster = objdata_to_db(obj)
             else:
                 l_imdbid = "No IMDb-Id!"
                 imdb_flag = 1
@@ -185,16 +188,16 @@ def process_file(file):
                 if 'Error' not in obj:
                     l_actors, l_country, l_director, l_writer, l_genre, l_language, l_released, \
                     l_runtime, l_plot, l_imdb_rating, l_awards, l_metascore, l_imdb_votes, \
-                    l_type, l_rated = objdata_to_db(obj)
+                    l_type, l_rated, l_poster = objdata_to_db(obj)
 
                 print(l_title, l_year, l_image, l_actors, l_country, l_director, l_writer, l_genre,
                       l_language, l_released, l_runtime, l_plot, l_imdb_rating, l_awards, l_metascore,
-                      l_imdb_votes, l_type, l_rated)
+                      l_imdb_votes, l_type, l_rated, l_poster)
 #            """
             # fill mongodb
             fill_collection(db, fs, l_post_id, l_imdbid, l_title, l_year, l_image, l_actors, l_country,
                             l_director, l_writer, l_genre, l_language, l_released, l_runtime, l_plot,
-                            l_imdb_rating, l_awards, l_metascore, l_imdb_votes, l_type, l_rated)
+                            l_imdb_rating, l_awards, l_metascore, l_imdb_votes, l_type, l_rated, l_poster)
 #            """
             # get dominant colors of each moviebarcode-image
             get_dominant_color(db, fs, l_post_id)
@@ -236,18 +239,32 @@ def objdata_to_db(obj):
     l_imdb_votes = obj['imdbVotes']
     l_type = obj['Type']
     l_rated = obj['Rated']
+    l_poster = obj['Poster']
     return l_actors, l_country, l_director, l_writer, l_genre, l_language, l_released,\
-           l_runtime, l_plot, l_imdb_rating, l_awards, l_metascore, l_imdb_votes, l_type, l_rated
+           l_runtime, l_plot, l_imdb_rating, l_awards, l_metascore, l_imdb_votes, \
+           l_type, l_rated, l_poster
 
 
 def fill_collection(db, fs, l_post_id, l_imdbid, l_title, l_year, l_image, l_actors,
                     l_country, l_director, l_writer, l_genre, l_language, l_released,
                     l_runtime, l_plot, l_imdb_rating, l_awards, l_metascore,
-                    l_imdb_votes, l_type, l_rated):
+                    l_imdb_votes, l_type, l_rated, l_poster):
     try:
         # saves JPG and GIF of MovieBarcodes in GridFS
         if not fs.exists({"_id": l_post_id}):
             fs.put(urllib.request.urlopen(l_image), _id=l_post_id, filename=l_image)
+
+        # posterid
+        l_posterid = "P" + l_post_id
+        if l_poster == "":
+            debugKH("No poster!")
+        elif l_poster == "N/A":
+            debugKH(l_poster)
+        else:
+            if not fs.exists({"_id": l_posterid}):
+                fs.put(urllib.request.urlopen(l_poster), _id=l_posterid, filename=l_poster)
+            else:
+                print("available yet (" + l_poster + ")")
 
         # if l_title contains "The Complete ..."
         # save series of movies (e.g. James Bond) in separate collection
@@ -350,11 +367,11 @@ def get_dominant_color(db, fs, l_post_id):
     my_img.close()
 
     cot = ct.ColorThief("myMovieBarcode.jpg")
-    arr_domcol = cot.get_palette(11)    # 10 most dominant colors in picture
+    arr_domcol = cot.get_palette()    #  9 most dominant colors in picture
 
     i = 0
     arr_domcol_hex = []
-    for i in range(0, 10):
+    for i in range(0, len(arr_domcol)):
         arr_domcol_hex.append(webcolors.rgb_to_hex(arr_domcol[i]))
         i = i + 1
     store_domcol_to_db(db, l_post_id, arr_domcol_hex)
@@ -378,8 +395,7 @@ def store_domcol_to_db(db, l_post_id, arr_domcol_hex):
                                     "6th": arr_domcol_hex[5],
                                     "7th": arr_domcol_hex[6],
                                     "8th": arr_domcol_hex[7],
-                                    "9th": arr_domcol_hex[8],
-                                    "10th": arr_domcol_hex[9]
+                                    "9th": arr_domcol_hex[8]
                                 }
                     }
                 },
@@ -403,8 +419,7 @@ def store_domcol_to_db(db, l_post_id, arr_domcol_hex):
                                     "6th": arr_domcol_hex[5],
                                     "7th": arr_domcol_hex[6],
                                     "8th": arr_domcol_hex[7],
-                                    "9th": arr_domcol_hex[8],
-                                    "10th": arr_domcol_hex[9]
+                                    "9th": arr_domcol_hex[8]
                                 }
                     }
                 },
