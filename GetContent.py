@@ -23,12 +23,14 @@ from urllib.request import urlopen
 import urllib.error
 import urllib.response
 import requests
-import re                            # Regular Expressions
-from pymongo import MongoClient      # NoSQL DB Framework
-import gridfs                        # Mongo DB Grid FS Bucket
+import re                                                       # Regular Expressions
+from pymongo import MongoClient                                 # NoSQL DB Framework
+import gridfs                                                   # Mongo DB Grid FS Bucket
 import json
-import colorthief as ct              # get dominate colors from image
-import webcolors                     # conversation rgb to hex
+import colorthief as ct                                         # get dominate colors from image
+import webcolors                                                # conversation rgb to hex
+#from pythonopensubtitles.opensubtitles import OpenSubtitles     # API connecting opensubtitles.org
+
 
 try:
     from html import unescape  # python 3.4+
@@ -193,14 +195,17 @@ def process_file(file):
                 print(l_title, l_year, l_image, l_actors, l_country, l_director, l_writer, l_genre,
                       l_language, l_released, l_runtime, l_plot, l_imdb_rating, l_awards, l_metascore,
                       l_imdb_votes, l_type, l_rated, l_poster)
-#            """
+            """
             # fill mongodb
             fill_collection(db, fs, l_post_id, l_imdbid, l_title, l_year, l_image, l_actors, l_country,
                             l_director, l_writer, l_genre, l_language, l_released, l_runtime, l_plot,
                             l_imdb_rating, l_awards, l_metascore, l_imdb_votes, l_type, l_rated, l_poster)
-#            """
+            """
             # get dominant colors of each moviebarcode-image
             get_dominant_color(db, fs, l_post_id)
+
+
+            # get_subtitles()
 
             print('\n')
 
@@ -367,18 +372,26 @@ def get_dominant_color(db, fs, l_post_id):
     my_img.close()
 
     cot = ct.ColorThief("myMovieBarcode.jpg")
-    arr_domcol = cot.get_palette()    #  9 most dominant colors in picture
+
+    # get dominat color
+    dominat_color = cot.get_color(quality=1)
+    dominat_color = webcolors.rgb_to_hex(dominat_color) # rgb to hex
+    # palette of colors
+    arr_domcol = cot.get_palette(color_count=10)
+
+    debugKH("DominantColor 1: " + dominat_color)
 
     i = 0
     arr_domcol_hex = []
     for i in range(0, len(arr_domcol)):
         arr_domcol_hex.append(webcolors.rgb_to_hex(arr_domcol[i]))
+        print("PaletteColor: ", i+2, " ", webcolors.rgb_to_hex(arr_domcol[i]))
         i = i + 1
-    store_domcol_to_db(db, l_post_id, arr_domcol_hex)
-    debugKH(arr_domcol)
+    debugKH(arr_domcol_hex)
+    store_domcol_to_db(db, l_post_id, dominat_color, arr_domcol_hex)
 
 
-def store_domcol_to_db(db, l_post_id, arr_domcol_hex):
+def store_domcol_to_db(db, l_post_id, dominat_color, arr_domcol_hex):
     if db.movie.find_one({"_id": l_post_id}):
         debugKH("UPDATE" + l_post_id)
         try:
@@ -387,15 +400,16 @@ def store_domcol_to_db(db, l_post_id, arr_domcol_hex):
                 {
                     '$set': {"dominantColors":
                                 {
-                                    "1st": arr_domcol_hex[0],
-                                    "2nd": arr_domcol_hex[1],
-                                    "3rd": arr_domcol_hex[2],
-                                    "4th": arr_domcol_hex[3],
-                                    "5th": arr_domcol_hex[4],
-                                    "6th": arr_domcol_hex[5],
-                                    "7th": arr_domcol_hex[6],
-                                    "8th": arr_domcol_hex[7],
-                                    "9th": arr_domcol_hex[8]
+                                    "1st": dominat_color,
+                                    "2nd": arr_domcol_hex[0],
+                                    "3rd": arr_domcol_hex[1],
+                                    "4th": arr_domcol_hex[2],
+                                    "5th": arr_domcol_hex[3],
+                                    "6th": arr_domcol_hex[4],
+                                    "7th": arr_domcol_hex[5],
+                                    "8th": arr_domcol_hex[6],
+                                    "9th": arr_domcol_hex[7],
+                                    "10th": arr_domcol_hex[8]
                                 }
                     }
                 },
@@ -411,15 +425,16 @@ def store_domcol_to_db(db, l_post_id, arr_domcol_hex):
                 {
                     '$set': {"dominantColors":
                                 {
-                                    "1st": arr_domcol_hex[0],
-                                    "2nd": arr_domcol_hex[1],
-                                    "3rd": arr_domcol_hex[2],
-                                    "4th": arr_domcol_hex[3],
-                                    "5th": arr_domcol_hex[4],
-                                    "6th": arr_domcol_hex[5],
-                                    "7th": arr_domcol_hex[6],
-                                    "8th": arr_domcol_hex[7],
-                                    "9th": arr_domcol_hex[8]
+                                    "1st": dominat_color,
+                                    "2nd": arr_domcol_hex[0],
+                                    "3rd": arr_domcol_hex[1],
+                                    "4th": arr_domcol_hex[2],
+                                    "5th": arr_domcol_hex[3],
+                                    "6th": arr_domcol_hex[4],
+                                    "7th": arr_domcol_hex[5],
+                                    "8th": arr_domcol_hex[6],
+                                    "9th": arr_domcol_hex[7],
+                                    "10th": arr_domcol_hex[8]
                                 }
                     }
                 },
@@ -429,6 +444,10 @@ def store_domcol_to_db(db, l_post_id, arr_domcol_hex):
             print(e)
     else:
         print("no entry for ", l_post_id)
+
+
+def get_subtitles():
+    print("")
 
 
 # commandline output katharina // ONLY TEST!
