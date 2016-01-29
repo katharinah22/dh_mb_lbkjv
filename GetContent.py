@@ -72,6 +72,8 @@ def process_file(file):
     # creates GridFS Bucket instance for storing image files
     fs = gridfs.GridFS(db)
 
+    write_color_clusters_to_db(db)
+
     # split inputstream at pattern1 (<a href=)
     # search for matches (pattern2: imageid, title, year) in splitted lines
     parts = re.split(pattern1, file)
@@ -201,9 +203,9 @@ def process_file(file):
                             l_director, l_writer, l_genre, l_language, l_released, l_runtime, l_plot,
                             l_imdb_rating, l_awards, l_metascore, l_imdb_votes, l_type, l_rated, l_poster)
             """
+
             # get dominant colors of each moviebarcode-image
             get_dominant_color(db, fs, l_post_id)
-
 
             # get_subtitles()
 
@@ -449,6 +451,37 @@ def store_domcol_to_db(db, l_post_id, dominat_color, arr_domcol_hex):
 def get_subtitles():
     print("")
 
+
+def write_color_clusters_to_db(db):
+    l_cc = open("satfaces.txt")
+    f = l_cc.read()
+
+    p_linebreak = re.compile('\n')
+    pattern1 = re.compile('\[\d{1,3}, \d{1,3}, \d{1,3}\] .*')
+    p_rgb = re.compile('\(\d{1,3}, \d{1,3}, \d{1,3}\)')
+    p_name = re.compile('\) .*')
+
+    cc_parts = (re.split(p_linebreak, f))
+    for cc_line in cc_parts:
+        if re.search(pattern1, cc_line):
+            cc_line = re.sub('\[', '(', cc_line)
+            cc_line = re.sub('\]', ')', cc_line)
+            l_match_rgb = ((re.search(p_rgb, cc_line)).group(0))            # rgb for db
+
+            #l_match_hex = webcolors.rgb_to_hex(l_match_rgb)                 # hex value for db
+
+            l_match_name = ((re.search(p_name, cc_line)).group(0))[2:]      # color name for db
+
+            db.colorcluster.insert_one(
+                    {
+                        "rgbval": l_match_rgb,
+                        "colorcluster": l_match_name
+                    }
+                )
+
+            print(l_match_rgb + " - " + l_match_name)
+
+    l_cc.close()
 
 # commandline output katharina // ONLY TEST!
 def debugKH(s):
