@@ -458,7 +458,7 @@ def write_color_clusters_to_db(db):
 
     p_linebreak = re.compile('\n')
     pattern1 = re.compile('\[\d{1,3}, \d{1,3}, \d{1,3}\] .*')
-    p_rgb = re.compile('\(\d{1,3}, \d{1,3}, \d{1,3}\)')
+    p_rgb = re.compile('\d{1,3}, \d{1,3}, \d{1,3}')
     p_name = re.compile('\) .*')
 
     cc_parts = (re.split(p_linebreak, f))
@@ -467,21 +467,44 @@ def write_color_clusters_to_db(db):
             cc_line = re.sub('\[', '(', cc_line)
             cc_line = re.sub('\]', ')', cc_line)
             l_match_rgb = ((re.search(p_rgb, cc_line)).group(0))            # rgb for db
+            l_match_rgb = re.split(',', l_match_rgb)
+            l_match_red = int(l_match_rgb[0])
+            l_match_green = int(l_match_rgb[1])
+            l_match_blue = int(l_match_rgb[2])
 
-            #l_match_hex = webcolors.rgb_to_hex(l_match_rgb)                 # hex value for db
+            l_tuple_rgb = l_match_red, l_match_green, l_match_blue
+            l_match_hex = webcolors.rgb_to_hex(l_tuple_rgb)                 # hex value for db
 
             l_match_name = ((re.search(p_name, cc_line)).group(0))[2:]      # color name for db
 
-            db.colorcluster.insert_one(
+            if db.colorcluster.find_one({"_id": l_match_hex}):
+                debugKH("UPDATE" + l_match_hex)
+                try:
+                    db.serie.update(
+                        {"_id": l_match_hex},
+                            {
+                                '$set':
+                                    {
+                                        "rgbval": l_match_rgb,
+                                        "colorcluster": l_match_name
+                                    }
+                            },
+                            upsert=False
+                    )
+                except Exception as e:
+                    print(e)
+
+            else:
+                db.colorcluster.insert_one(
                     {
+                        "_id": l_match_hex,
                         "rgbval": l_match_rgb,
                         "colorcluster": l_match_name
                     }
                 )
 
-            print(l_match_rgb + " - " + l_match_name)
-
     l_cc.close()
+
 
 # commandline output katharina // ONLY TEST!
 def debugKH(s):
