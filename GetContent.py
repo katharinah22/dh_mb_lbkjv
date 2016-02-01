@@ -14,6 +14,7 @@ __author__ = 'katharina hafner'
 #                   store in collections
 # 27/01/16          fetching posters from omdb, storing at grid fs; changes
 #                   color thief
+# 29/01/16          color clustering data into mongodb
 
 
 import urllib.parse
