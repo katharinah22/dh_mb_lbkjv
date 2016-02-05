@@ -4,41 +4,163 @@
 		<meta charset="utf-8">
 
 		<title>Movie Barcodes</title>
-
-		  <link rel="stylesheet" href="res/css/style.css">
+            <link rel="stylesheet" href="libs/material-design-iconic-font/css/material-design-iconic-font.min.css">
+            <link rel="stylesheet" href="libs/silviomoreto-bootstrap-select-a8ed49e/dist/css/bootstrap-select.css">
+            <link rel="stylesheet" href="libs/bootstrap-3.3.4/css/bootstrap.min.css">
+            <link rel="stylesheet" href="libs/jquery-ui-1.11.4.custom/jquery-ui.css">
+		    <link rel="stylesheet" href="res/css/style.css">
 
 	</head>
 
 	<body>
 
-  <div class="container">
-  </div>
+        <div class="container">
+            <h1>Moviebarcode</br>Analyzer</h1>
+            <div class="row">
+                <div id="filterInputFields" class="col-sm-6 col-md-5 col-lg-4">
+                    <div id="selectedFilters">
+                        <div class="filter">Title: 12 Years a Slave</div>
+                        <span class="md-lg md-close closeButton"></span>
+                    </div>
+                    <div class="title">title: </div>
+                    <input type="text" class="form-control" id="titleInput">
 
-  <script type="text/html" id="movieItem-tpl">
-    <div id="<%= id %>">
-      <img src="<%= poster %>" />
-      <div class="title"><%= title %></div>
-      <div class="actors">Actors: <%= actors %></div>
-      <div class="country">Country: <%= country %></div>
-      <div class="director">Director: <%= director %></div>
-      <div class="genre">Genre: <%= genre %></div>
-      <div class="language">Language: <%= language %></div>
-      <div class="year">Year: <%= year %></div>
-      <div class="runtime">Runtime: <%= runtime %></div>
-    </div>
-  </script>
+                    <div class="title">colors: </div>
+                    <div id="colorSelector" class="clear">
+                        <div class="colorSelectItem" id="colorSelectItem1"></div>
+                        <div class="colorSelectItem" id="colorSelectItem2"></div>
+                        <div class="colorSelectItem" id="colorSelectItem3"></div>
+                        <div class="colorSelectItem" id="colorSelectItem4"></div>
+                        <div class="colorSelectItem" id="colorSelectItem5"></div>
+                        <div class="colorSelectItem" id="colorSelectItem6"></div>
+                        <div class="colorSelectItem" id="colorSelectItem7"></div>
+                        <div class="colorSelectItem" id="colorSelectItem8"></div>
+                        <div class="colorSelectItem" id="colorSelectItem9"></div>
+                        <div class="colorSelectItem" id="colorSelectItem10"></div>
+                        <div class="colorSelectItem" id="colorSelectItem11"></div>
+                        <div class="colorSelectItem" id="colorSelectItem12"></div>
+                    </div>
+                    <div class="title">director: </div>
+                    <input type="text" class="form-control" id="regisseurInput">
+                    <div class="title">genre: </div>
+                    <select class="selectpicker" id="genreSelect">
+                    </select>
+                    <div class="title">year: </div>
 
-  <script src="libs/jquery-2.1.4.js"></script>
-  <script src="libs/underscore.js"></script>
-  <script src="libs/mimic_2.3/source/mimic.js"></script>
+                    <p id="sliderValue">1920 - 2016</p>
+                    <div id="slider-range"></div>
+                      
+                    <div class="title">cast: </div>
+                    <input type="text" class="form-control" class="actorInput">
+                    
+                </div>
+                <div id="results" class="col-sm-6 col-md-7 col-lg-8">
+                </div>
+            </div>
+        </div>
 
-  <script src="src/MovieBarcodes.js"></script>
-  <script src="src/MainController.js"></script>
-  <script src="src/MainModel.js"></script>
-  <script src="src/BarcodesView.js"></script>
-  <script src="src/MovieItem.js"></script>
+        <div class="modal fade" id="detailInformationModal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="detailInformationTitle">Title</h4>
+                    </div>
+                    <div class="modal-body">
+                        <img id="detailInformationImage" src="" />
+                        <div class="title">dominant colors: </div>
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>color</th>
+                                    <th>hex color</th>
+                                    <th>percentage</th>
+                                    <th>color name</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><div class="dominantColorItem" id="colorSelectItem12"></div></td>
+                                    <td>#3f352d</td>
+                                    <td>55%</td>
+                                    <td>brown</td>
+                                </tr>
+                                <tr>
+                                    <td><div class="dominantColorItem" id="colorSelectItem11"></div></td>
+                                    <td>#201c1f</td>
+                                    <td>29%</td>
+                                    <td>black</td>
+                                </tr>
+                                <tr>
+                                    <td><div class="dominantColorItem" id="colorSelectItem10"></div></td>
+                                    <td>#867c62</td>
+                                    <td>6%</td>
+                                    <td>gray</td>
+                                </tr>
+                            </tbody>
+                        </table>
 
-  <script>
-      MovieBarcodes.init();    
-  </script>
+                        <div class="title">movie details: </div>
+                        <br class="clear"/>
+
+                        <div id="detailDescriptions">
+                            <div class="detailDescription">year:</div>
+                            <div class="detailDescription">genre:</div>
+                            <div class="detailDescription">director:</div>
+                            <div class="detailDescription">country:</div>
+                            <div class="detailDescription">language:</div>
+                            <div class="detailDescription">runtime:</div>
+                            <div class="detailDescription">cast:</div>
+                        </div>
+                        <div id="detailInformations">
+                            <div id="detailInformationYear">Year:</div>
+                            <div id="detailInformationGenre">Genre:</div>
+                            <div id="detailInformationDirector">Director:</div>
+                            <div id="detailInformationCountry">Country:</div>
+                            <div id="detailInformationLanguage">Language:</div>
+                            <div id="detailInformationRuntime">Runtime:</div>
+                            <div id="detailInformationActors">Actors:</div>
+                        </div>
+                        <br class="clear"/>
+                        <div class="title">plot summary: </div>
+                        <div id="detailInformationSummary"></div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+    </body>
+
+    <script type="text/html" id="resultItem-tpl">
+        <div class="resultItem" id="<%= id %>">
+            <div class="resultImgContainer">
+                <img src="<%= poster %>" />
+                <div class="resultColorItems">
+                    <div class="resultColorItem" id="resultColorItem1" style="background-color:<%= firstColor %>;"></div>      
+                    <div class="resultColorItem" id="resultColorItem2" style="background-color:<%= secondColor %>;"></div>
+                    <div class="resultColorItem" id="resultColorItem3" style="background-color:<%= thirdColor %>;"></div>
+                </div>
+            </div>
+            <div class='resultTitle'><%= title %></div>
+        </div>
+    </script>
+
+    <script src="libs/jquery-2.1.4.js"></script>
+    <script src="libs/underscore.js"></script>
+    <script src="libs/jquery-ui-1.11.4.custom/jquery-ui.js"></script>
+    <script src="libs/bootstrap-3.3.4/js/bootstrap.js"></script>
+    <script src="libs/silviomoreto-bootstrap-select-a8ed49e/dist/js/bootstrap-select.js"></script>
+    <script src="libs/mimic_2.3/source/mimic.js"></script>
+
+    <script src="src/MovieBarcodes.js"></script>
+    <script src="src/MainController.js"></script>
+    <script src="src/MainModel.js"></script>
+    <script src="src/FilterView.js"></script>
+    <script src="src/ResultsView.js"></script>
+    <script src="src/ResultItem.js"></script>
+
+    <script>
+        MovieBarcodes.init();    
+    </script>
 </html>

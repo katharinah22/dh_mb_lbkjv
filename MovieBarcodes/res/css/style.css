@@ -1,3 +1,227 @@
+html {
+  	height: 100%; 
+  	background-color: #fafafa !important;
+}
+
+h1 {
+	/*text-align: center; */
+}
+
+body {
+  	margin: 0px;
+  	font-family: 'Helvetica Neue', Helvetica, Arial;
+  	color: #333;
+  	height: 100%;
+  	-webkit-user-select: none;
+  	-moz-user-select: none;
+  	-ms-user-select: none;
+  	user-select: none;
+  	-webkit-tap-highlight-color: rgba(0,0,0,0);
+ 	-webkit-touch-callout: none;
+  	background-color: #fafafa !important;
+}
+
 .title {
 	font-weight: bold; 
+}
+
+#selectedFilters {
+	margin-bottom: 40px;
+	position: relative;
+}
+
+#selectedFilters .closeButton {
+	position: absolute;
+	top: 10px; 
+	right: 5px;
+	color: white; 
+	cursor: pointer;
+}
+
+.clear {
+	clear: both; 
+}
+
+.filter {
+	background-color: #9C004B; 
+	width: 100%;
+	color: white;
+	padding: 10px;
+	border-radius: 2px; 
+}
+
+#filterInputFields {
+	width: 220px;
+	padding-top: 20px;
+}
+
+#filterInputFields input, #filterInputFields .bootstrap-select, #slider-range {
+	/*margin-bottom: 20px;*/
+	width: 100%;
+}
+
+table {
+	margin: 0px !important;
+}
+
+#colorSelector {
+	height: 58px; 
+	/*margin-bottom: 20px; */
+}
+
+.title {
+	background-color: #333; /*#9C004B; */
+	color: white;
+	padding: 2px 10px;
+	border-radius: 2px; 
+	margin: 20px 0px 10px 0px;
+	display: inline-block;
+}
+
+#detailInformationTitle {
+	font-weight: bold
+}
+
+#results {
+	padding-top: 20px;
+}
+
+.resultItem {
+	width: 140px; 
+	height: 210px; 
+	background-color: white; 
+	box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+	border-radius: 2px; 
+	float: left; 
+	margin: 20px;
+	cursor: pointer;
+}
+
+.resultImgContainer {
+	width: 140px; 
+	height: 210px; 
+	position: relative;
+	overflow: hidden;
+}
+
+.resultItem img {
+	/*width: 100%; */
+	height: 100%; 
+}
+
+.resultTitle {
+	color: #333;
+}
+
+#detailDescriptions {
+	font-weight: bold;
+	width: 80px;  
+}
+
+#detailDescriptions, #detailInformations {
+	float: left; 
+}
+
+.colorSelectItem {
+	margin-bottom: 5px; 
+}
+
+.colorSelectItem, .resultColorItem, .dominantColorItem {
+	width: 26px; 
+	height: 26px;
+	float: left;
+	border-radius: 2px; 
+	margin-right: 5px; 
+	border: 1px solid #ccc;
+}
+
+.dominantColorItem {
+	margin: 0 auto; 
+}
+
+.resultColorItems {
+	position: absolute;
+	bottom: 0px;
+	right: 0px;
+	padding: 5px 0px 5px 5px; 
+	background-color: white;
+	border-radius: 2px; 
+}
+
+#detailInformationImage {
+	width: 100%;
+}
+
+#colorSelectItem1 {
+	background-color: red;
+}
+
+#colorSelectItem2 {
+	background-color: orange; 
+}
+
+#colorSelectItem3 {
+	background-color: yellow; 
+}
+
+#colorSelectItem4 {
+	background-color: green;
+}
+
+#colorSelectItem5 {
+	background-color: deepskyblue; 
+}
+
+#colorSelectItem6 {
+	background-color: blue; 
+}
+
+#colorSelectItem7 {
+	background-color: darkviolet;
+}
+
+#colorSelectItem8 {
+	background-color: lightpink; 
+}
+
+#colorSelectItem9 {
+	background-color: white; 
+}
+
+#colorSelectItem10 {
+	background-color: darkgray;
+}
+
+#colorSelectItem11 {
+	background-color: black; 
+}
+
+#colorSelectItem12 {
+	background-color: saddlebrown; 
+}
+
+.ui-slider-range {
+    background: #D08BAF;
+}
+
+.ui-slider {
+	border-radius: 2px; 
+	border: 1px solid #ccc;
+}
+
+.ui-slider-handle {
+	background: #F9FBFA;
+	border-radius: 2px; 
+}
+
+.ui-slider-handle:focus {
+    outline:none;
+}
+
+.ui-slider .ui-slider-handle {
+    background: #9C004B;
+    width: 10px;
+    height: 22px;
+    border: none;
+    cursor: pointer;
 }
