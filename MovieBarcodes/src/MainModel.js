@@ -2,6 +2,7 @@ MovieBarcodes.MainModel = (function() {
 	var that = {},
 
 	init = function() {
+		getColors(); 
 		var data = {parameters: ""}; 
 		getAllMovies(data); 
 		/*var data = {parameters: [{key: "year", value: "2004"}]}; 
@@ -9,6 +10,16 @@ MovieBarcodes.MainModel = (function() {
 		
 		return that; 
 	},  
+
+	getColors = function() {
+		var diff = require('/usr/local/lib/node_modules/color-diff');
+		var color = { R: 255, G: 1, B: 30 };
+		var palette = [ {R: 255, G: 0, B: 0 },
+                {R: 0, G: 255, B: 0 },
+                {R: 0, G: 0, B: 255} ];
+        var closestColor = diff.closest(color, palette);
+        console.log(closestColor); 
+	}, 
 
 	getAllMovies = function(data) {
 		$.ajax({url: "src/php/getMovies.php?command=getAllMovies", data: data}).done(function(data) {
