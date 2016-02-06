@@ -42,7 +42,12 @@
                 $parameter = $parameters[$i]; 
                 $key = $parameter['key']; 
                 $value = $parameter['value']; 
-                if($value[0] == "/") {
+                /*if($value[0] == "/") {
+                    $value = new MongoRegex($value);
+                }*/
+                if(isset($value['gte']) && isset($value['lte'])) {
+                    $value = array('$gte' => (int) $value['gte'], '$lte' => (int) $value['lte']);
+                } else if($value[0] == "/") {
                     $value = new MongoRegex($value);
                 }
                 $p[$key] = $value; 
@@ -80,24 +85,6 @@
                 }
             }
             $posterId = "P" . $id; 
-
-
-
-
-
-
-
-            /*$data = $gridFS->findOne(array("_id" => $posterId))->getBytes();
-$im = imagecreatefromstring($data);
-if ($im !== false) {
-    header('Content-Type: image/jpg');
-    echo $im; 
-    imagejpeg($im);
-    imagedestroy($im); 
-}*/
-
-
-            
             $posterBinary =  $gridFS->findOne(array("_id" => $posterId)); 
             $posterData = "";
             $img = ""; 

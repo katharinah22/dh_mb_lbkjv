@@ -21,6 +21,7 @@ MovieBarcodes.MainModel = (function() {
 
 	getMovies = function(data) {
 		$.ajax({url: "src/php/getMovies.php?command=getMovies", data: data}).done(function(data) {
+			console.log(data); 
 			var movies = jQuery.parseJSON(data);
 			//var movies = object.movies; 
 			$(that).trigger('loadResults', [movies]); 

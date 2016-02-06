@@ -3,17 +3,6 @@ MovieBarcodes.ResultsView = (function() {
 	
 	init = function() {
 
-		$("#slider-range").slider({
-		    range: true,
-		    min: 1920,
-		    max: 2016,
-		    step: 1,
-		    values: [1920, 2016],
-		    slide: function (e, ui) {
-		        $('#sliderValue').html(ui.values[0] + ' - ' + ui.values[1]);
-		    }
-		});
-
 		return that; 
 	}, 
 

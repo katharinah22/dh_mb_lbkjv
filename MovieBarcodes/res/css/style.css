@@ -56,9 +56,13 @@ body {
 }
 
 #filterInputFields input, #filterInputFields .bootstrap-select, #slider-range {
-	/*margin-bottom: 20px;*/
 	width: 100%;
 }
+
+#toolbar .bootstrap-select > .dropdown-toggle, #toolbar .dropdown-menu {
+	min-width: 0px !important; 
+	width: 100px !important; 
+} 
 
 table {
 	margin: 0px !important;

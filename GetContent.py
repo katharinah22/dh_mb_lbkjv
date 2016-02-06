@@ -14,6 +14,8 @@ __author__ = 'katharina hafner'
 #                   store in collections
 # 27/01/16          fetching posters from omdb, storing at grid fs; changes
 #                   color thief
+# 29/01/16          color clustering data into mongodb
+# 02/02/16          restrict hits by removing Titles with "...[Sequence from]"
 
 
 import urllib.parse
@@ -27,8 +29,10 @@ import re                                                       # Regular Expres
 from pymongo import MongoClient                                 # NoSQL DB Framework
 import gridfs                                                   # Mongo DB Grid FS Bucket
 import json
-import colorthief as ct                                         # get dominate colors from image
+import colorthief as ct                                         # get dominant colors from image
 import webcolors                                                # conversation rgb to hex
+#import cv2
+#from sklearn.cluster import KMeans                              # get dominant colors from image
 #from pythonopensubtitles.opensubtitles import OpenSubtitles     # API connecting opensubtitles.org
 
 
@@ -46,6 +50,7 @@ def get_content(link):
     # Crawl Website Moviebarcodes.tumblr.com/movie-index
     response = urllib.request.urlopen(link)
     str_response = unescape(response.read().decode('utf-8'))
+
     # debugKH(str_response)
     # use inputstring
     process_file(str_response)
@@ -56,6 +61,7 @@ def process_file(file):
     # all ness. pattern
     pattern1 = re.compile('<a href=')   # Searchpattern SPLIT-Command
     pattern2 = re.compile('"/post/\d{10,12}/">.* (\(\d{4}\)|\(\d{4}-\d{4}\))')
+    p_seqfr = re.compile('\[Sequence from\]')
     p_post_id = re.compile('\d{10,12}')
     p_year = re.compile('(\(\d{4}\)|\(\d{4}-\d{4}\))')
     p_title = re.compile('>.* \(')
@@ -72,15 +78,17 @@ def process_file(file):
     # creates GridFS Bucket instance for storing image files
     fs = gridfs.GridFS(db)
 
-    write_color_clusters_to_db(db)
+    # write_color_clusters_to_db(db)
 
     # split inputstream at pattern1 (<a href=)
     # search for matches (pattern2: imageid, title, year) in splitted lines
     parts = re.split(pattern1, file)
     for line in parts:
         # check if pattern matches
-        if re.search(pattern2, line):
-            # search in matched-line for db-values
+        if re.search(p_seqfr, line):
+            debugKH("No hit: " + line)     # go over titles "...[SEQUENCE FROM]"
+        elif re.search(pattern2, line):
+            # search in matched-line for valid db-values
             l_post_id = (re.search(p_post_id, line)).group(0)
             l_year = ((re.search(p_year, line)).group(0))[1:-1]    # rm 1 char from both sides of the match
             l_title = ((re.search(p_title, line)).group(0))[1:-2]  # rm 1 from left, 2 from right side
@@ -197,15 +205,17 @@ def process_file(file):
                 print(l_title, l_year, l_image, l_actors, l_country, l_director, l_writer, l_genre,
                       l_language, l_released, l_runtime, l_plot, l_imdb_rating, l_awards, l_metascore,
                       l_imdb_votes, l_type, l_rated, l_poster)
-            #"""
+
             # fill mongodb
             fill_collection(db, fs, l_post_id, l_imdbid, l_title, l_year, l_image, l_actors, l_country,
                             l_director, l_writer, l_genre, l_language, l_released, l_runtime, l_plot,
                             l_imdb_rating, l_awards, l_metascore, l_imdb_votes, l_type, l_rated, l_poster)
             #"""
 
+
             # get dominant colors of each moviebarcode-image
-            get_dominant_color(db, fs, l_post_id)
+            get_dominant_color_by_colorthief(db, fs, l_post_id)
+            get_dominant_colors(db, fs, l_post_id)
 
             # get_subtitles()
 
@@ -257,11 +267,11 @@ def fill_collection(db, fs, l_post_id, l_imdbid, l_title, l_year, l_image, l_act
                     l_runtime, l_plot, l_imdb_rating, l_awards, l_metascore,
                     l_imdb_votes, l_type, l_rated, l_poster):
     try:
-        # saves JPG and GIF of MovieBarcodes in GridFS
+        # save JPG or GIF of MovieBarcodes in GridFS
         if not fs.exists({"_id": l_post_id}):
             fs.put(urllib.request.urlopen(l_image), _id=l_post_id, filename=l_image)
 
-        # posterid
+        # save movieposter in db
         l_posterid = "P" + l_post_id
         if l_poster == "":
             debugKH("No poster!")
@@ -335,7 +345,7 @@ def fill_collection(db, fs, l_post_id, l_imdbid, l_title, l_year, l_image, l_act
                         "_id": l_post_id,
                         "imdb_id": l_imdbid,
                         "title": l_title,
-                        "year": l_year,
+                        "year": int(l_year),
                         "director": l_director,
                         "writer": l_writer,
                         "actors": l_actors,
@@ -367,7 +377,7 @@ def fill_collection(db, fs, l_post_id, l_imdbid, l_title, l_year, l_image, l_act
         print('******************************Exception beim fillcollection()', e)
 
 
-def get_dominant_color(db, fs, l_post_id):
+def get_dominant_color_by_colorthief(db, fs, l_post_id):
     img_barcode = fs.get(l_post_id).read()
     my_img = open("myMovieBarcode.jpg", "wb")
     my_img.write(img_barcode)
@@ -392,6 +402,25 @@ def get_dominant_color(db, fs, l_post_id):
     debugKH(arr_domcol_hex)
     store_domcol_to_db(db, l_post_id, dominat_color, arr_domcol_hex)
 
+
+def get_dominant_colors(db, fs, l_post_id):
+    img_barcode = fs.get(l_post_id).read()
+    my_img = open("myMovieBarcode.jpg", "wb")
+    my_img.write(img_barcode)
+    my_img.close()
+'''
+    image = cv2.imread(args["image"])
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+
+    # Reshape the image to be a list of pixels
+    image_array = my_img.reshape((my_img.shape[0] * my_img.shape[1], 3))
+
+    # Clusters the pixels
+    clt = KMeans(n_clusters = 3)
+    clt.fit(image_array)
+    ##
+'''
 
 def store_domcol_to_db(db, l_post_id, dominat_color, arr_domcol_hex):
     if db.movie.find_one({"_id": l_post_id}):
