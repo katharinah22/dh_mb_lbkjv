@@ -34,13 +34,7 @@ import webcolors                                                # conversation r
 #import cv2
 #from sklearn.cluster import KMeans                              # get dominant colors from image
 #from pythonopensubtitles.opensubtitles import OpenSubtitles     # API connecting opensubtitles.org
-from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
-import argparse
-import cv2
-import numpy as np
 
-from Naked.toolshed.shell import execute_js, muterun_js
 
 try:
     from html import unescape  # python 3.4+
@@ -220,9 +214,9 @@ def process_file(file):
 
 
             # get dominant colors of each moviebarcode-image
-            # get_dominant_color_by_colorthief(db, fs, l_post_id)
-            # get_dominant_colors(db, fs, l_post_id)
-            get_dominant_colors_by_colordiff(db, fs, l_post_id) 
+            get_dominant_color_by_colorthief(db, fs, l_post_id)
+            get_dominant_colors(db, fs, l_post_id)
+
             # get_subtitles()
 
             print('\n')
@@ -381,92 +375,6 @@ def fill_collection(db, fs, l_post_id, l_imdbid, l_title, l_year, l_image, l_act
                 )
     except Exception as e:
         print('******************************Exception beim fillcollection()', e)
-
-def centroid_histogram(clt):
-    # grab the number of different clusters and create a histogram
-    # based on the number of pixels assigned to each cluster
-    numLabels = np.arange(0, len(np.unique(clt.labels_)) + 1)
-    (hist, _) = np.histogram(clt.labels_, bins = numLabels)
-
-    # normalize the histogram, such that it sums to one
-    hist = hist.astype("float")
-    hist /= hist.sum()
-
-    # return the histogram
-    return hist
-
-def get_dominant_colors_by_colordiff(db, fs, l_post_id):
-    img_barcode = fs.get(l_post_id).read()
-    my_img = open("myMovieBarcode.jpg", "wb")
-    my_img.write(img_barcode)
-    my_img.close()
-
-    image = cv2.imread("myMovieBarcode.jpg")
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    image = image.reshape((image.shape[0] * image.shape[1], 3))
-    clt = KMeans(n_clusters = 3)
-    clt.fit(image)
-    hist = centroid_histogram(clt)
-    count = 1; 
-    dominant_colors = {}
-    for (percent, color) in zip(hist, clt.cluster_centers_):
-        print(percent)
-        color_R = color[0]
-        color_G = color[1]
-        color_B = color[2]
-        #real_color = "{ R: " + str(color_R) + ", G: " + str(color_G) + ", B: " + str(color_B) + " }"
-        real_color = "rgb(" + str(color_R) + ", " + str(color_G) + ", " + str(color_B) + ")"
-        print(real_color) 
-        response = muterun_js('colorDiffTest.js ' + str(color_R) + ' ' + str(color_G) + ' ' + str(color_B)); 
-        clustered_color = response.stdout.rstrip().decode('ascii')
-        print(clustered_color)
-        dominant_colors[str(count)] = {
-            "realcolor": real_color,
-            "percent": percent, 
-            "clusteredcolor": clustered_color
-        }
-        count = count+1
-    print(dominant_colors)
-    #return dominant_colors
-    store_colors_by_colordiff_to_db(db, l_post_id, dominant_colors)
-
-def store_colors_by_colordiff_to_db(db, l_post_id, dominant_colors):
-    print(dominant_colors)
-    if db.movie.find_one({"_id": l_post_id}):
-        debugKH("UPDATE" + l_post_id)
-        try:
-            db.movie.update(
-                {"_id": l_post_id},
-                {
-                    '$set': {"dominantColors":
-                                dominant_colors
-                    }
-                },
-                upsert=False
-            )
-        except Exception as e:
-            print(e)
-    elif db.serie.find_one({"_id": l_post_id}):
-        debugKH("UPDATE" + l_post_id)
-        try:
-            db.serie.update(
-                {"_id": l_post_id},
-                {
-                    '$set': {"dominantColors":
-                                dominant_colors
-                    }
-                },
-                upsert=False
-            )
-        except Exception as e:
-            print(e)
-    else:
-        print("no entry for ", l_post_id)
-
-
-
-
-
 
 
 def get_dominant_color_by_colorthief(db, fs, l_post_id):

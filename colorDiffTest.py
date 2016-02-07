@@ -1,3 +1,3 @@
-from Naked.toolshed.shell import execute_js
+from Naked.toolshed.shell import execute_js, muterun_js
 
-success = execute_js('colorDiffTest.js')
+result = muterun_js('colorDiffTest.js 255 1 30')
