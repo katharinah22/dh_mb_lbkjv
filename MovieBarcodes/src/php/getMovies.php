@@ -66,9 +66,9 @@
             $title = $movie['title'];
             $id = $movie['_id']; 
             $dominantColors = $movie['dominantColors']; 
-            $firstColor = $dominantColors['1st']; 
-            $secondColor = $dominantColors['2nd']; 
-            $thirdColor = $dominantColors['3rd']; 
+            $firstColor = $dominantColors['1']['realcolor']; 
+            $secondColor = $dominantColors['2']['realcolor']; 
+            $thirdColor = $dominantColors['3']['realcolor']; 
 
             $storyline = $movie['storyline'];
             if($init) {

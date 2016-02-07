@@ -411,10 +411,9 @@ def get_dominant_colors_by_colordiff(db, fs, l_post_id):
     dominant_colors = {}
     for (percent, color) in zip(hist, clt.cluster_centers_):
         print(percent)
-        color_R = color[0]
-        color_G = color[1]
-        color_B = color[2]
-        #real_color = "{ R: " + str(color_R) + ", G: " + str(color_G) + ", B: " + str(color_B) + " }"
+        color_R = int(color[0])
+        color_G = int(color[1])
+        color_B = int(color[2])
         real_color = "rgb(" + str(color_R) + ", " + str(color_G) + ", " + str(color_B) + ")"
         print(real_color) 
         response = muterun_js('colorDiffTest.js ' + str(color_R) + ' ' + str(color_G) + ' ' + str(color_B)); 
@@ -427,7 +426,6 @@ def get_dominant_colors_by_colordiff(db, fs, l_post_id):
         }
         count = count+1
     print(dominant_colors)
-    #return dominant_colors
     store_colors_by_colordiff_to_db(db, l_post_id, dominant_colors)
 
 def store_colors_by_colordiff_to_db(db, l_post_id, dominant_colors):
