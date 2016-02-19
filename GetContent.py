@@ -16,7 +16,7 @@ __author__ = 'katharina hafner'
 #                   color thief
 # 29/01/16          color clustering data into mongodb
 # 02/02/16          restrict hits by removing Titles with "...[Sequence from]"
-
+# 19/02/16          get subtitles from OpenSubtitles.org
 
 import urllib.parse
 from urllib import parse
@@ -35,7 +35,11 @@ from Naked.toolshed.shell import execute_js, muterun_js
 import argparse
 import numpy as np
 import cv2
+import struct,os                                                # get subtitles from OpenSubtitles
+import io, gzip                                                 # get subtitles from OpenSubtitles, unzip subtitles
+import base64                                                   # get subtitles from OpenSubtitles, decode base64
 from sklearn.cluster import KMeans
+from xmlrpc.client import ServerProxy, Error
 # import matplotlib.pyplot as plt
 
 try:
@@ -213,7 +217,7 @@ def process_file(file):
             # get dominant colors of each moviebarcode-image
             # get_dominant_color_by_colorthief(db, fs, l_post_id)   # unused
             get_dominant_colors_by_colordiff(db, fs, l_post_id) 
-            # get_subtitles()
+            get_subtitles(db, l_post_id, l_imdbid)
             print('\n')
 
 
@@ -529,8 +533,59 @@ def store_domcol_to_db(db, l_post_id, dominat_color, arr_domcol_hex):
         print("no entry for ", l_post_id)
 
 
-def get_subtitles():
-    print("")
+def store_subtitles_to_db(db, l_post_id, subtitle):
+        print("Subtitle", subtitle)
+        if db.movie.find_one({"_id": l_post_id}):
+            debugKH("UPDATE" + l_post_id)
+            try:
+                db.movie.update(
+                    {"_id": l_post_id},
+                    {
+                        '$set': {"subtitle":
+                                    subtitle
+                        }
+                    },
+                    upsert=False
+                )
+            except Exception as e:
+                print(e)
+        elif db.serie.find_one({"_id": l_post_id}):
+            debugKH("UPDATE" + l_post_id)
+            try:
+                db.serie.update(
+                    {"_id": l_post_id},
+                    {
+                        '$set': {"subtitle":
+                                    subtitle
+                        }
+                    },
+                    upsert=False
+                )
+            except Exception as e:
+                print(e)
+        else:
+            print("no entry for ", l_post_id)
+
+
+def get_subtitles (db, l_post_id, l_imdbid):
+    try:
+        server = ServerProxy('http://api.opensubtitles.org/xml-rpc')
+        # to Do: Register a UserAgent for this project and insert registration data
+        token = server.LogIn('', '', 'en', 'OSTestUserAgent')['token']
+        imdb_id=int(l_imdbid[2:])
+        search_request = []
+        search_request.append({'imdbid':imdb_id, 'sublanguageid':'en'})
+        resp = server.SearchSubtitles(token, search_request)
+        subtitle_id = []
+        subtitle_id.append(resp['data'][0]['IDSubtitle'])
+        subtitle_data = server.DownloadSubtitles(token, subtitle_id)
+        if subtitle_data['status'] == '200 OK':
+            compressed_data = subtitle_data['data'][0]['data']
+            decoded_subtitle = base64.b64decode(compressed_data)
+            decoded_subtitle = gzip.GzipFile(fileobj=io.BytesIO(decoded_subtitle)).read()
+            store_subtitles_to_db(db, l_post_id, decoded_subtitle)
+    except(ValueError):
+        print("No subtitle available")
 
 
 # unused
