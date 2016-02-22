@@ -18,6 +18,7 @@ __author__ = 'katharina hafner'
 # 02/02/16          restrict hits by removing Titles with "...[Sequence from]"
 # 19/02/16          get subtitles from OpenSubtitles.org
 # 21/02/16          insert registered UserAgent account (OpenSubtitles) + first try to format subtitles
+# 22/02/16          format subtitle string (remove unnecessary characters and numbers)
 
 import urllib.parse
 from urllib import parse
@@ -567,25 +568,21 @@ def store_subtitles_to_db(db, l_post_id, subtitle):
         else:
             print("no entry for ", l_post_id)
 
-# doesn't work
 # removes numbers, special characters, control characters and tags
-#def remove_invalid_signs (decoded_subtitle):
- #  #convert bytes to string
- #   subtitles_string = decoded_subtitle.decode("utf-8")
- #   print(subtitles_string)
- #   #remove html tags
- #   subtitles_string = re.sub('<.*?>','', subtitles_string)
- #   print(subtitles_string)
+def remove_invalid_characters(decoded_subtitle):
+   #convert bytes to string
+    subtitles_string = decoded_subtitle.decode("latin-1")
+
+    #remove html tags
+    subtitles_string = re.sub('<.*?>','', subtitles_string)
 
     #remove control characters (\n\r etc)
- #   subtitles_string = re.sub(r'\s+', ' ', subtitles_string)
- #   print(subtitles_string)
+    subtitles_string = re.sub(r'\s+', ' ', subtitles_string)
 
     #remove numbers and special characters
- #   subtitles_string = re.sub("[^a-zA-Z]","", subtitles_string)
- #   print(subtitles_string)
+    subtitles_string = re.sub("[^a-zA-Z\']+"," ", subtitles_string)
 
- #   return subtitles_string
+    return subtitles_string
 
 
 def get_subtitles (db, l_post_id, l_imdbid):
@@ -604,9 +601,8 @@ def get_subtitles (db, l_post_id, l_imdbid):
             decoded_subtitle = base64.b64decode(compressed_data)
             #subtitle in byte format
             decoded_subtitle = gzip.GzipFile(fileobj=io.BytesIO(decoded_subtitle)).read()
-            #clean_subtitle = remove_invalid_signs(decoded_subtitle)
-            #store_subtitles_to_db(db, l_post_id, clean_substitle)
-            store_subtitles_to_db(db, l_post_id, decoded_subtitle)
+            clean_subtitle = remove_invalid_characters(decoded_subtitle)
+            store_subtitles_to_db(db, l_post_id, clean_subtitle)
     except(ValueError):
         print("No subtitle available")
 
