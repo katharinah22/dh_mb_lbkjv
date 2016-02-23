@@ -20,6 +20,7 @@ __author__ = 'katharina hafner'
 # 21/02/16          insert registered UserAgent account (OpenSubtitles) + first try to format subtitles
 # 22/02/16          format subtitle string (remove unnecessary characters and numbers)
 
+
 import urllib.parse
 from urllib import parse
 import urllib.request
@@ -37,12 +38,13 @@ from Naked.toolshed.shell import execute_js, muterun_js
 import argparse
 import numpy as np
 import cv2
-import struct,os                                                # get subtitles from OpenSubtitles
+from sklearn.cluster import KMeans
+
+import struct, os                                                # get subtitles from OpenSubtitles
 import io, gzip                                                 # get subtitles from OpenSubtitles, unzip subtitles
 import base64                                                   # get subtitles from OpenSubtitles, decode base64
-from sklearn.cluster import KMeans
 from xmlrpc.client import ServerProxy, Error
-# import matplotlib.pyplot as plt
+
 
 try:
     from html import unescape  # python 3.4+
@@ -229,7 +231,7 @@ def urlEncodeNonAscii(b):
 
 def get_movie_json(title):
     urlTitle = urllib.parse.quote_plus(title.replace('The Complete ', ''))
-    #print("http://www.omdbapi.com/?t=" + urlTitle)
+    # print("http://www.omdbapi.com/?t=" + urlTitle)
     response = urlopen("http://www.omdbapi.com/?t=" + urlTitle).read().decode('utf8')
     obj = json.loads(response)
     return obj
@@ -535,6 +537,29 @@ def store_domcol_to_db(db, l_post_id, dominat_color, arr_domcol_hex):
         print("no entry for ", l_post_id)
 
 
+def get_subtitles(db, l_post_id, l_imdbid):
+    try:
+        server = ServerProxy('http://api.opensubtitles.org/xml-rpc')
+        token = server.LogIn('dh_moviebarcodes', 'dh_ws2015', 'en', 'Moviebarcode Analyzer')['token']
+        imdb_id = int(l_imdbid[2:])
+        search_request = []
+        search_request.append({'imdbid': imdb_id, 'sublanguageid': 'en'})
+        resp = server.SearchSubtitles(token, search_request)
+        subtitle_id = []
+        subtitle_id.append(resp['data'][0]['IDSubtitle'])
+        subtitle_data = server.DownloadSubtitles(token, subtitle_id)
+        if subtitle_data['status'] == '200 OK':
+            compressed_data = subtitle_data['data'][0]['data']
+            decoded_subtitle = base64.b64decode(compressed_data)
+            # subtitle in byte format
+            decoded_subtitle = gzip.GzipFile(fileobj=io.BytesIO(decoded_subtitle)).read()
+            clean_subtitle = remove_invalid_characters(decoded_subtitle)
+            print(clean_subtitle)
+            store_subtitles_to_db(db, l_post_id, clean_subtitle)
+    except ValueError:
+        print("No subtitle available")
+
+
 def store_subtitles_to_db(db, l_post_id, subtitle):
         print("Subtitle", subtitle)
         if db.movie.find_one({"_id": l_post_id}):
@@ -543,9 +568,7 @@ def store_subtitles_to_db(db, l_post_id, subtitle):
                 db.movie.update(
                     {"_id": l_post_id},
                     {
-                        '$set': {"subtitle":
-                                    subtitle
-                        }
+                        '$set': {"subtitle": subtitle}
                     },
                     upsert=False
                 )
@@ -557,9 +580,7 @@ def store_subtitles_to_db(db, l_post_id, subtitle):
                 db.serie.update(
                     {"_id": l_post_id},
                     {
-                        '$set': {"subtitle":
-                                    subtitle
-                        }
+                        '$set': {"subtitle": subtitle}
                     },
                     upsert=False
                 )
@@ -568,43 +589,19 @@ def store_subtitles_to_db(db, l_post_id, subtitle):
         else:
             print("no entry for ", l_post_id)
 
+
 # removes numbers, special characters, control characters and tags
 def remove_invalid_characters(decoded_subtitle):
-   #convert bytes to string
+    # convert bytes to string
     subtitles_string = decoded_subtitle.decode("latin-1")
-
-    #remove html tags
-    subtitles_string = re.sub('<.*?>','', subtitles_string)
-
-    #remove control characters (\n\r etc)
+    # remove html tags
+    subtitles_string = re.sub('<.*?>', '', subtitles_string)
+    # remove control characters (\n\r etc)
     subtitles_string = re.sub(r'\s+', ' ', subtitles_string)
-
-    #remove numbers and special characters
-    subtitles_string = re.sub("[^a-zA-Z\']+"," ", subtitles_string)
+    # remove numbers and special characters
+    subtitles_string = re.sub("[^a-zA-Z\']+", " ", subtitles_string)
 
     return subtitles_string
-
-
-def get_subtitles (db, l_post_id, l_imdbid):
-    try:
-        server = ServerProxy('http://api.opensubtitles.org/xml-rpc')
-        token = server.LogIn('dh_moviebarcodes', 'dh_ws2015', 'en', 'Moviebarcode Analyzer')['token']
-        imdb_id=int(l_imdbid[2:])
-        search_request = []
-        search_request.append({'imdbid':imdb_id, 'sublanguageid':'en'})
-        resp = server.SearchSubtitles(token, search_request)
-        subtitle_id = []
-        subtitle_id.append(resp['data'][0]['IDSubtitle'])
-        subtitle_data = server.DownloadSubtitles(token, subtitle_id)
-        if subtitle_data['status'] == '200 OK':
-            compressed_data = subtitle_data['data'][0]['data']
-            decoded_subtitle = base64.b64decode(compressed_data)
-            #subtitle in byte format
-            decoded_subtitle = gzip.GzipFile(fileobj=io.BytesIO(decoded_subtitle)).read()
-            clean_subtitle = remove_invalid_characters(decoded_subtitle)
-            store_subtitles_to_db(db, l_post_id, clean_subtitle)
-    except(ValueError):
-        print("No subtitle available")
 
 
 # unused
