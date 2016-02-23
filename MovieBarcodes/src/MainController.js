@@ -18,6 +18,11 @@ MovieBarcodes.MainController = (function() {
 		$(resultsView).on('resultItemClick', onResultItemClick); 
 
 		$(filterView).on('loadNewResults', onLoadNewResults); 
+		$(filterView).on('changeSorting', onChangeSorting); 
+	}, 
+
+	onChangeSorting = function(event, value, sortDirection) {
+		mainModel.sortResults(value, sortDirection); 
 	}, 
 
 	onLoadNewResults = function(event, parameters) {
@@ -30,8 +35,7 @@ MovieBarcodes.MainController = (function() {
 
 	onLoadResultsAndGenres = function(event, movies, genres) {
 		resultsView.addResults(movies); 
-		filterView.loadGenreSelect(genres); 
-		
+		filterView.loadGenreSelect(genres); 	
 	}, 
 
 	onLoadResults = function(event, movies) {

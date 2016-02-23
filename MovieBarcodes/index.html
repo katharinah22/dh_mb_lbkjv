@@ -19,8 +19,7 @@
             <div class="row">
                 <div id="filterInputFields" class="col-sm-6 col-md-5 col-lg-4">
                     <div id="selectedFilters">
-                        <div class="filter">Title: 12 Years a Slave</div>
-                        <span class="md-lg md-close closeButton"></span>
+                        
                     </div>
                     <div class="title">title: </div>
                     <input type="text" class="form-control" id="titleInput">
@@ -64,11 +63,9 @@
                             <option>director</option>
                             <option>country</option>
                         </select>
-                        <button class="btn btn-default button"><span class="zmdi zmdi-long-arrow-up zmdi-hc-lg"></span></button>
-                        <button class="btn btn-default button"><span class="zmdi zmdi-long-arrow-down zmdi-hc-lg"></span></button>
-                        <button class="btn btn-default button"><span class="zmdi zmdi-view-list zmdi-hc-2x"></span></button>
-                        <button class="btn btn-default button"><span class="zmdi zmdi-view-module zmdi-hc-2x"></span></button>
-                        <button class="btn btn-default button"><span class="zmdi zmdi-close zmdi-hc-lg"></span></button>
+                        <button class="btn btn-default button ascending" id="sortDirectionToggle"><span class="zmdi zmdi-long-arrow-up zmdi-hc-lg"></span></button>
+                        <button class="btn btn-default button layoutButton"><span class="zmdi zmdi-view-list zmdi-hc-2x"></span></button>
+                        <button class="btn btn-default button layoutButton"><span class="zmdi zmdi-view-module zmdi-hc-2x"></span></button>
                     </div>
                     <div id="results"></div>
                 </div>
@@ -162,6 +159,14 @@
         </div>
     </script>
 
+    <script type="text/html" id="filterItem-tpl"> 
+        <div class="filter" id="<%= id %>">
+            <button class="btn btn-default button closeButton">
+                <span class="zmdi zmdi-close zmdi-hc-lg"></span>
+            </button> <span class="filterType"><%= filterType %></span>: <span class="filterName"><%= filterName %></span>
+        </div>
+    </script>
+
     <script src="libs/jquery-2.1.4.js"></script>
     <script src="libs/underscore.js"></script>
     <script src="libs/jquery-ui-1.11.4.custom/jquery-ui.js"></script>
@@ -175,6 +180,7 @@
     <script src="src/FilterView.js"></script>
     <script src="src/ResultsView.js"></script>
     <script src="src/ResultItem.js"></script>
+    <script src="src/FilterItem.js"></script>
 
     <script>
         MovieBarcodes.init();    

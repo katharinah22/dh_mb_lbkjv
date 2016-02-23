@@ -7,7 +7,7 @@ MovieBarcodes.ResultsView = (function() {
 	}, 
 
 	addResults = function(movies) {
-		console.log(movies); 
+		console.log("ready"); 
 		$("#results").empty(); 
 		for (var i = 0; i < movies.length; i++) {
 			var id = movies[i].id;

@@ -2,13 +2,21 @@ MovieBarcodes.MainModel = (function() {
 	var that = {},
 
 	init = function() {
-		var data = {parameters: ""}; 
+		var data = {parameters: "", sort: {value: "title", sortDirection: "1"}}; 
 		getAllMovies(data); 
 		/*var data = {parameters: [{key: "year", value: "2004"}]}; 
 		getAllMovies(data); */
 		
 		return that; 
 	},  
+
+	sortResults = function(value, sortDirection) {
+		$.ajax({url: "src/php/getMovies.php?command=sortResults", data: {value: value, sortDirection: sortDirection}}).done(function(data) {
+			var movies = jQuery.parseJSON(data);
+			//var movies = object.movies; 
+			$(that).trigger('loadResults', [movies]); 
+		});
+	}, 
 
 	getAllMovies = function(data) {
 		$.ajax({url: "src/php/getMovies.php?command=getAllMovies", data: data}).done(function(data) {
@@ -21,7 +29,6 @@ MovieBarcodes.MainModel = (function() {
 
 	getMovies = function(data) {
 		$.ajax({url: "src/php/getMovies.php?command=getMovies", data: data}).done(function(data) {
-			console.log(data); 
 			var movies = jQuery.parseJSON(data);
 			//var movies = object.movies; 
 			$(that).trigger('loadResults', [movies]); 
@@ -49,5 +56,6 @@ MovieBarcodes.MainModel = (function() {
 	that.init = init; 
 	that.getMovies = getMovies; 
 	that.getMovieDetails = getMovieDetails; 
+	that.sortResults = sortResults; 
 	return that; 
 })(); 

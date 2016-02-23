@@ -26,27 +26,27 @@ body {
 }
 
 #selectedFilters {
-	margin-bottom: 40px;
+	/*margin-bottom: 40px;*/
 	position: relative;
 }
 
 #selectedFilters .closeButton {
-	position: absolute;
-	top: 10px; 
-	right: 5px;
-	color: white; 
+	padding: 0px 5px!important;
 	cursor: pointer;
+	border-radius: 22px;
+	outline:none;
 }
 
+.filterType{
+	font-weight: bold; 
+}
 .clear {
 	clear: both; 
 }
 
 .filter {
-	background-color: #9C004B; 
 	width: 100%;
-	color: white;
-	padding: 10px;
+	padding-bottom: 10px;
 	border-radius: 2px; 
 }
 
@@ -59,10 +59,24 @@ body {
 	width: 100%;
 }
 
-#toolbar .bootstrap-select > .dropdown-toggle, #toolbar .dropdown-menu {
+#toolbar {
+	margin-left: 20px;
+	margin-right: 50px; 
+}
+
+#toolbar .bootstrap-select > .dropdown-toggle, #toolbar .dropdown-menu, 
+#toolbar .bootstrap-select:not([class*="col-"]):not([class*="form-control"]):not(.input-group-btn) {
 	min-width: 0px !important; 
 	width: 100px !important; 
 } 
+
+.layoutButton {
+	float: right; 
+}
+
+.colorSelectItem {
+	cursor: pointer;
+}
 
 table {
 	margin: 0px !important;
@@ -205,7 +219,8 @@ table {
 }
 
 .ui-slider-range {
-    background: #D08BAF;
+    background: rgb(205, 205, 205);
+	border-radius: 0px !important;
 }
 
 .ui-slider {
@@ -214,7 +229,7 @@ table {
 }
 
 .ui-slider-handle {
-	background: #F9FBFA;
+	background: #333;
 	border-radius: 2px; 
 }
 
@@ -223,7 +238,7 @@ table {
 }
 
 .ui-slider .ui-slider-handle {
-    background: #9C004B;
+    background: #333;
     width: 10px;
     height: 22px;
     border: none;

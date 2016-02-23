@@ -7,14 +7,18 @@
     $myCollection = $mongoDB->db_moviebarcodes->movie;
     $gridFS = $mongoDB->db_moviebarcodes->getGridFS();
 
-    //getAllMovies("", false); 
+    //$sort = array('value'=> "title", 'sortDirection'=> 1); 
+    //getAllMovies("", $sort, false); 
     //$parameters = [{"key": "genre", "value": new MongoRegex("/Sport/")}]; 
     //getAllMovies($parameters);
     switch($_GET['command']) {
         case 'getAllMovies':
             $parameters = $_GET['parameters']; 
+            $sort = $_GET['sort']; 
             $init = true; 
-            getAllMovies($parameters, $init); 
+            ChromePhp::log($sort["value"]);
+            ChromePhp::log($sort["sortDirection"]);
+            getAllMovies($parameters, $sort, $init); 
             break; 
         case 'getMovieDetailsByID': 
             $id = $_GET['id'];
@@ -22,29 +26,25 @@
             break; 
         case 'getMovies':
             $parameters = $_GET['parameters']; 
+            $sort = $_GET['sort']; 
             $init = false; 
-            getAllMovies($parameters, $init);
+            getAllMovies($parameters, $sort, $init);
             break; 
         default: 
             return; 
     }
 
-
-    function getAllMovies($parameters, $init) {
+    function getAllMovies($parameters, $sort, $init) {
         global $myCollection, $gridFS; 
         $p = array(); 
         if($parameters == "") {
-            //find(array('title' => new MongoRegex("/12/")));
-            //array('storyline.genre' => new MongoRegex("/Horror/"))
+            //->sort(array("title" => -1)); 
             $results = $myCollection->find();
         } else {
             for($i = 0; $i < count($parameters); $i++) {
                 $parameter = $parameters[$i]; 
                 $key = $parameter['key']; 
                 $value = $parameter['value']; 
-                /*if($value[0] == "/") {
-                    $value = new MongoRegex($value);
-                }*/
                 if(isset($value['gte']) && isset($value['lte'])) {
                     $value = array('$gte' => (int) $value['gte'], '$lte' => (int) $value['lte']);
                 } else if($value[0] == "/") {
@@ -52,9 +52,11 @@
                 }
                 $p[$key] = $value; 
             }
-            $results = $myCollection->find($p);
-            
+            $results = $myCollection->find($p);          
         }
+
+        $results->sort(array($sort["value"] => (int) $sort["sortDirection"])); 
+
         $movies = array(); 
         $genres = array(); 
         $result = array(); 

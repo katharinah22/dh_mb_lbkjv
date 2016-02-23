@@ -39,6 +39,7 @@ import matplotlib.pyplot as plt
 import argparse
 import cv2
 import numpy as np
+from PIL import Image
 
 from Naked.toolshed.shell import execute_js, muterun_js
 
@@ -401,6 +402,11 @@ def get_dominant_colors_by_colordiff(db, fs, l_post_id):
     my_img.write(img_barcode)
     my_img.close()
 
+    # if image is GIF -> convert to JPEG
+    im = Image.open('myMovieBarcode.jpg')
+    if im.format =='GIF': 
+        im.convert('RGB').save('myMovieBarcode.jpg')
+
     image = cv2.imread("myMovieBarcode.jpg")
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     image = image.reshape((image.shape[0] * image.shape[1], 3))
@@ -427,6 +433,7 @@ def get_dominant_colors_by_colordiff(db, fs, l_post_id):
         count = count+1
     print(dominant_colors)
     store_colors_by_colordiff_to_db(db, l_post_id, dominant_colors)
+
 
 def store_colors_by_colordiff_to_db(db, l_post_id, dominant_colors):
     print(dominant_colors)
