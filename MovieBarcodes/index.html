@@ -142,7 +142,7 @@
                 </div>
             </div>
         </div>
-
+        <div id="loadingOverlay"></div>
     </body>
 
     <script type="text/html" id="resultItem-tpl">
@@ -160,7 +160,7 @@
     </script>
 
     <script type="text/html" id="filterItem-tpl"> 
-        <div class="filter" id="<%= id %>">
+        <div class="filter <%= filterType %>Filter" id="<%= id %>">
             <button class="btn btn-default button closeButton">
                 <span class="zmdi zmdi-close zmdi-hc-lg"></span>
             </button> <span class="filterType"><%= filterType %></span>: <span class="filterName"><%= filterName %></span>
@@ -173,6 +173,7 @@
     <script src="libs/bootstrap-3.3.4/js/bootstrap.js"></script>
     <script src="libs/silviomoreto-bootstrap-select-a8ed49e/dist/js/bootstrap-select.js"></script>
     <script src="libs/mimic_2.3/source/mimic.js"></script>
+    <script src="libs/spin.js"></script>
 
     <script src="src/MovieBarcodes.js"></script>
     <script src="src/MainController.js"></script>

@@ -1,10 +1,12 @@
 MovieBarcodes.FilterView = (function() {
 	var that = {}, 
 	filterItemNr, 
+	parameters,
 	
 	init = function() {
 		//$("#titleInput").
 		filterItemNr = 0; 
+		parameters = [];
 		$("#slider-range").slider({
 		    range: true,
 		    min: 1920,
@@ -19,7 +21,10 @@ MovieBarcodes.FilterView = (function() {
 		    change: function (e, ui) {
 		    	var startValue = ui.values[0]; 
 		    	var endValue = ui.values[1];
-		    	var parameter = {parameters: [{key: "year", value: {'gte': startValue, 'lte': endValue}}], sort: {value: "title", sortDirection: "1"}}; 
+		    	removeFilter("year"); 
+		    	removeFilterItemByType("year"); 
+		    	parameters.push({key: "year", value: {'gte': startValue, 'lte': endValue}}); 
+		    	var parameter = {parameters: parameters, sort: {value: "title", sortDirection: "1"}}; 
     			$(that).trigger('loadNewResults', [parameter]); 
     			addFilterItem("year", (startValue + " - " + endValue)); 
 		    }
@@ -33,7 +38,9 @@ MovieBarcodes.FilterView = (function() {
 	}, 
 
 	onSelectColor = function(event) {
-		var parameter = {parameters: [{key: "dominantColors.1.clusteredcolor", value: 'black'}], sort: {value: "title", sortDirection: "1"}}; 
+		parameters.push({key: "dominantColors.1.clusteredcolor", value: 'black'}); 
+		console.log(parameters); 
+		var parameter = {parameters: parameters, sort: {value: "title", sortDirection: "1"}}; 
     	$(that).trigger('loadNewResults', [parameter]); 
 	},
 
@@ -49,7 +56,13 @@ MovieBarcodes.FilterView = (function() {
 				key = "actors"; 
 			}
 			var value = event.currentTarget.value; 
-			var parameter = {parameters: [{key: key, value: "/" + value + "/i"}], sort: {value: "title", sortDirection: "1"}}; 
+			removeFilter(key); 
+			removeFilterItemByType(key); 
+			parameters.push({key: key, value: "/" + value + "/i"}); 
+			console.log(parameters); 
+			var parameter = {parameters: parameters, sort: {value: "title", sortDirection: "1"}}; 
+			//var parameter = {parameters: parameters, sort: {value: "title", sortDirection: "1"}}; 
+			console.log(parameter); 
 			//var parameter = {parameters: [{key: "year", value: {'gte': '2006', 'lte': '2011'}}]}; 
     		$(that).trigger('loadNewResults', [parameter]); 
     		addFilterItem(key, value); 
@@ -59,9 +72,19 @@ MovieBarcodes.FilterView = (function() {
 	onGenreSelectChange = function(event) {
 		var selected = $(this).find("option:selected").val();
 		var genre = selected.replace(/ \(.*\)/, "");
-		var parameter = {parameters: [{key: "storyline.genre", value: "/" + genre + "/"}], sort: {value: "title", sortDirection: "1"}}; 
+		removeFilter("storyline.genre"); 
+		removeFilterItemByType("genre"); 
+		parameters.push({key: "storyline.genre", value: "/" + genre + "/"}); 
+		console.log(parameters); 
+		var parameter = {parameters: parameters, sort: {value: "title", sortDirection: "1"}}; 
     	$(that).trigger('loadNewResults', [parameter]); 
     	addFilterItem("genre", genre); 
+	}, 
+
+	removeFilterItemByType = function(type) {
+		if ($("." + type + "Filter")[0]){ 
+			$("." + type + "Filter")[0].remove(); 
+		};
 	}, 
 
 	loadGenreSelect = function(genres) {
@@ -91,8 +114,25 @@ MovieBarcodes.FilterView = (function() {
     	$(that).trigger('loadNewResults', [parameter]); 
 	}, 
 
+	removeFilter = function(filterType) {
+		console.log(filterType); 
+		for (var i = 0; i < parameters.length; i++) {
+			if (parameters[i]["key"] == "storyline.genre") {
+				console.log(parameters[i]);
+				parameters.splice(i, 1); 
+			}
+		}
+	}, 
+
 	onRemoveFilterItemClick = function(event) {
-		$(event.currentTarget).closest(".filter").remove(); 
+		var $filter = $(event.currentTarget).closest(".filter"); 
+		var filterType = $filter.find(".filterType").text();
+		console.log(filterType); 
+		$filter.remove();
+		removeFilter(filterType); 
+		console.log(parameters); 
+		var parameter = {parameters: parameters, sort: {value: "title", sortDirection: "1"}}; 
+    	$(that).trigger('loadNewResults', [parameter]); 
 	}, 
 
 	makeFilterItem = function(options) {

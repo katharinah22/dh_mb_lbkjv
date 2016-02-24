@@ -7,8 +7,8 @@
     $myCollection = $mongoDB->db_moviebarcodes->movie;
     $gridFS = $mongoDB->db_moviebarcodes->getGridFS();
 
-    //$sort = array('value'=> "title", 'sortDirection'=> 1); 
-    //getAllMovies("", $sort, false); 
+    /*$sort = array('value'=> "title", 'sortDirection'=> 1); 
+    getAllMovies("", $sort, false); */
     //$parameters = [{"key": "genre", "value": new MongoRegex("/Sport/")}]; 
     //getAllMovies($parameters);
     switch($_GET['command']) {
@@ -45,6 +45,8 @@
                 $parameter = $parameters[$i]; 
                 $key = $parameter['key']; 
                 $value = $parameter['value']; 
+                ChromePhp::log($key);
+                ChromePhp::log($value);
                 if(isset($value['gte']) && isset($value['lte'])) {
                     $value = array('$gte' => (int) $value['gte'], '$lte' => (int) $value['lte']);
                 } else if($value[0] == "/") {
@@ -52,6 +54,7 @@
                 }
                 $p[$key] = $value; 
             }
+            ChromePhp::log($p);
             $results = $myCollection->find($p);          
         }
 
@@ -60,6 +63,7 @@
         $movies = array(); 
         $genres = array(); 
         $result = array(); 
+        //$movies = "";
 
         $resultsLength = $results->count(); 
         $genres["all"] = $resultsLength; 
@@ -98,7 +102,8 @@
                 }
             //ChromePhp::log($title);
             //ChromePhp::log($id);
-        
+            //$movies = $movies.'<div class="resultItem" id="'.$id.'"><div class="resultImgContainer"><img src="'.$img.'" /><div class="resultColorItems"><div class="resultColorItem" id="resultColorItem1" style="background-color:'.$firstColor.';"></div><div class="resultColorItem" id="resultColorItem2" style="background-color:'.$secondColor.';"></div><div class="resultColorItem" id="resultColorItem3" style="background-color:'.$thirdColor.';"></div></div></div><div class="resultTitle">'.$title.'</div></div>';
+            
             $movies[] = array("id"=>$id, "title"=>$title, "poster"=>$img, "firstColor"=>$firstColor, "secondColor"=>$secondColor, "thirdColor"=>$thirdColor); 
         }
         if($init) {
