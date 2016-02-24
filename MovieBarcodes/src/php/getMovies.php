@@ -70,6 +70,7 @@
         foreach ($results as $movie) {
 
             $title = $movie['title'];
+            $year = $movie['year'];
             $id = $movie['_id']; 
             $dominantColors = $movie['dominantColors']; 
             $firstColor = $dominantColors['1']['realcolor']; 
@@ -77,9 +78,10 @@
             $thirdColor = $dominantColors['3']['realcolor']; 
 
             $storyline = $movie['storyline'];
+            $genre = $storyline['genre'];
+            $genresOfThisMovie = split(", ", $genre);
             if($init) {
-                $genre = $storyline['genre'];
-                $genresOfThisMovie = split(", ", $genre);
+                
                 for ($i = 0; $i < count($genresOfThisMovie); $i++) {
                     $currentGenre = $genresOfThisMovie[$i]; 
                     //echo (strcmp($currentGenre, 'N/A') != 0); 
@@ -97,14 +99,10 @@
                 if (null != $posterBinary) {
                     $posterData = base64_encode($gridFS->findOne(array("_id" => $posterId))->getBytes());
                     $img = "data:image/jpeg;base64, $posterData"; //"<img src='data:image/jpeg;base64, $posterData' />";
-                    /*$test = "<img src='data:image/jpeg;base64, $posterData' />";
-                    echo $test; */
                 }
-            //ChromePhp::log($title);
-            //ChromePhp::log($id);
             //$movies = $movies.'<div class="resultItem" id="'.$id.'"><div class="resultImgContainer"><img src="'.$img.'" /><div class="resultColorItems"><div class="resultColorItem" id="resultColorItem1" style="background-color:'.$firstColor.';"></div><div class="resultColorItem" id="resultColorItem2" style="background-color:'.$secondColor.';"></div><div class="resultColorItem" id="resultColorItem3" style="background-color:'.$thirdColor.';"></div></div></div><div class="resultTitle">'.$title.'</div></div>';
             
-            $movies[] = array("id"=>$id, "title"=>$title, "poster"=>$img, "firstColor"=>$firstColor, "secondColor"=>$secondColor, "thirdColor"=>$thirdColor); 
+            $movies[] = array("id"=>$id, "title"=>$title, "year"=>$year, "genre"=>$genresOfThisMovie, "poster"=>$img, "firstColor"=>$firstColor, "secondColor"=>$secondColor, "thirdColor"=>$thirdColor); 
         }
         if($init) {
             $result = array("movies"=>$movies, "genres"=>$genres); 

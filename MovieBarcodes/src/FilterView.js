@@ -2,11 +2,13 @@ MovieBarcodes.FilterView = (function() {
 	var that = {}, 
 	filterItemNr, 
 	parameters,
+	sort, 
 	
 	init = function() {
 		//$("#titleInput").
 		filterItemNr = 0; 
 		parameters = [];
+		sort = {value: "title", sortDirection: "1"}; 
 		$("#slider-range").slider({
 		    range: true,
 		    min: 1920,
@@ -24,7 +26,7 @@ MovieBarcodes.FilterView = (function() {
 		    	removeFilter("year"); 
 		    	removeFilterItemByType("year"); 
 		    	parameters.push({key: "year", value: {'gte': startValue, 'lte': endValue}}); 
-		    	var parameter = {parameters: parameters, sort: {value: "title", sortDirection: "1"}}; 
+		    	var parameter = {parameters: parameters, sort: sort}; 
     			$(that).trigger('loadNewResults', [parameter]); 
     			addFilterItem("year", (startValue + " - " + endValue)); 
 		    }
@@ -39,8 +41,7 @@ MovieBarcodes.FilterView = (function() {
 
 	onSelectColor = function(event) {
 		parameters.push({key: "dominantColors.1.clusteredcolor", value: 'black'}); 
-		console.log(parameters); 
-		var parameter = {parameters: parameters, sort: {value: "title", sortDirection: "1"}}; 
+		var parameter = {parameters: parameters, sort: sort}; 
     	$(that).trigger('loadNewResults', [parameter]); 
 	},
 
@@ -59,14 +60,15 @@ MovieBarcodes.FilterView = (function() {
 			removeFilter(key); 
 			removeFilterItemByType(key); 
 			parameters.push({key: key, value: "/" + value + "/i"}); 
-			console.log(parameters); 
-			var parameter = {parameters: parameters, sort: {value: "title", sortDirection: "1"}}; 
-			//var parameter = {parameters: parameters, sort: {value: "title", sortDirection: "1"}}; 
-			console.log(parameter); 
-			//var parameter = {parameters: [{key: "year", value: {'gte': '2006', 'lte': '2011'}}]}; 
-    		$(that).trigger('loadNewResults', [parameter]); 
+			adaptResults();  
     		addFilterItem(key, value); 
 		}
+	}, 
+
+	adaptResults = function() {
+		var p = (parameters.length == 0) ? "" : parameters; 
+		var parameter = {parameters: p, sort: sort}; 
+    	$(that).trigger('loadNewResults', [parameter]);
 	}, 
 
 	onGenreSelectChange = function(event) {
@@ -75,9 +77,7 @@ MovieBarcodes.FilterView = (function() {
 		removeFilter("storyline.genre"); 
 		removeFilterItemByType("genre"); 
 		parameters.push({key: "storyline.genre", value: "/" + genre + "/"}); 
-		console.log(parameters); 
-		var parameter = {parameters: parameters, sort: {value: "title", sortDirection: "1"}}; 
-    	$(that).trigger('loadNewResults', [parameter]); 
+		adaptResults(); 
     	addFilterItem("genre", genre); 
 	}, 
 
@@ -98,7 +98,6 @@ MovieBarcodes.FilterView = (function() {
 		var toggleButton = $(event.currentTarget); 
 		var sortDirection = null; 
 		var value = $("#sortedBySelect").val(); 
-		console.log(value); 
 		toggleButton.empty(); 
 		if(toggleButton.hasClass("ascending")) {
 			toggleButton.removeClass("ascending").addClass("descending"); 
@@ -110,15 +109,13 @@ MovieBarcodes.FilterView = (function() {
 			toggleButton.append('<span class="zmdi zmdi-long-arrow-up zmdi-hc-lg"></span>'); 
 			sortDirection = "1"; 
 		}
-		var parameter = {parameters: "", sort: {value: "title", sortDirection: sortDirection}}; 
-    	$(that).trigger('loadNewResults', [parameter]); 
+		sort = {value: "title", sortDirection: sortDirection}; 
+		adaptResults(); 
 	}, 
 
 	removeFilter = function(filterType) {
-		console.log(filterType); 
 		for (var i = 0; i < parameters.length; i++) {
-			if (parameters[i]["key"] == "storyline.genre") {
-				console.log(parameters[i]);
+			if (parameters[i]["key"] == filterType) {
 				parameters.splice(i, 1); 
 			}
 		}
@@ -127,12 +124,10 @@ MovieBarcodes.FilterView = (function() {
 	onRemoveFilterItemClick = function(event) {
 		var $filter = $(event.currentTarget).closest(".filter"); 
 		var filterType = $filter.find(".filterType").text();
-		console.log(filterType); 
+		filterType = (filterType == "genre") ? "storyline.genre" : filterType; 
 		$filter.remove();
 		removeFilter(filterType); 
-		console.log(parameters); 
-		var parameter = {parameters: parameters, sort: {value: "title", sortDirection: "1"}}; 
-    	$(that).trigger('loadNewResults', [parameter]); 
+		adaptResults(); 
 	}, 
 
 	makeFilterItem = function(options) {

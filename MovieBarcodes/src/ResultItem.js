@@ -2,6 +2,7 @@ MovieBarcodes.ResultItem = function() {
 	var that = {}, 
 	id = null, 
 	title = null, 
+	year = null, 
 	poster = null, 
 	firstColor = null, 
 	secondColor = null, 
@@ -11,6 +12,7 @@ MovieBarcodes.ResultItem = function() {
 	init = function(options) {
 		id = options.id; 
 		title = options.title;
+		year = options.year;
 		poster = options.poster;
 		firstColor = options.firstColor;
 		secondColor = options.secondColor;
@@ -25,6 +27,7 @@ MovieBarcodes.ResultItem = function() {
 		var tpl = _.template(template, {
 			id: id, 
 			title: title,
+			year: year,
 			poster: poster,
 			firstColor: firstColor, 
 			secondColor: secondColor, 

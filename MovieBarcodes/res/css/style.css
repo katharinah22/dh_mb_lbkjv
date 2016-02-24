@@ -26,7 +26,6 @@ body {
 }
 
 #selectedFilters {
-	/*margin-bottom: 40px;*/
 	position: relative;
 }
 
@@ -40,6 +39,7 @@ body {
 .filterType{
 	font-weight: bold; 
 }
+
 .clear {
 	clear: both; 
 }
@@ -84,7 +84,6 @@ table {
 
 #colorSelector {
 	height: 58px; 
-	/*margin-bottom: 20px; */
 }
 
 .title {
@@ -105,13 +104,10 @@ table {
 }
 
 .resultItem {
-	width: 140px; 
+	width: 190px; 
 	height: 210px; 
-	background-color: white; 
-	box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
-	border-radius: 2px; 
 	float: left; 
-	margin: 20px;
+	margin: 40px 20px;
 	cursor: pointer;
 }
 
@@ -120,6 +116,10 @@ table {
 	height: 210px; 
 	position: relative;
 	overflow: hidden;
+
+	background-color: white; 
+	box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+	border-radius: 2px;
 }
 
 .resultItem img {
@@ -131,13 +131,9 @@ table {
 	color: #333;
 }
 
-#detailDescriptions {
+.detailDescription {
 	font-weight: bold;
 	width: 80px;  
-}
-
-#detailDescriptions, #detailInformations {
-	float: left; 
 }
 
 .colorSelectItem {
@@ -164,6 +160,133 @@ table {
 	padding: 5px 0px 5px 5px; 
 	background-color: white;
 	border-radius: 2px; 
+}
+
+#moviebarcodeLogo {
+	height: 78px;
+    float: left;
+    margin: 20px 20px 0px 0px;
+}
+.detailDescription, .detailInformation, .resultTitle, .resultYear, .genreImages, .resultImgContainer {
+	float: left;
+}
+
+.genreImageContainer {
+	background: url(../images/MovieIcons.png);
+    background-repeat: no-repeat;
+    background-size: 2500%;
+    width: 50px;
+    height: 50px;
+    background-position: -50px;
+}
+
+.genreImages {
+	width: 50px;
+	height: 100%;
+}
+
+.detailInformation {
+	max-width: 460px;
+}
+
+.genreImg {
+	height: 100%;
+}
+
+.genreAction {
+	background-position: 0px;
+}
+
+.genreAdult {
+	background-position: -50px;
+}
+
+.genreAdventure {
+	background-position: -100px;
+}
+
+.genreAnimation {
+	background-position: -150px;
+}
+
+.genreBiography {
+	background-position: -200px;
+}
+
+.genreComedy {
+	background-position: -250px;
+}
+
+.genreCrime {
+	background-position: -300px;
+}
+
+.genreDocumentary {
+	background-position: -350px;
+}
+
+.genreDrama {
+	background-position: -400px;
+}
+
+.genreFamily {
+	background-position: -450px;
+}
+
+.genreFantasy {
+	background-position: -500px;
+}
+
+.genreFilm-Noir {
+	background-position: -550px;
+}
+
+.genreShort {
+	background-position: -600px;
+}
+
+.genreHorror {
+	background-position: -650px;
+}
+
+.genreHistory {
+	background-position: -700px;
+}
+
+.genreMusic {
+	background-position: -750px;
+}
+
+.genreMusical {
+	background-position: -800px;
+}
+
+.genreMystery {
+	background-position: -850px;
+}
+
+.genreRomance {
+	background-position: -950px;
+}
+
+.genreSci-Fi {
+	background-position: -1000px;
+}
+
+.genreSport {
+	background-position: -1050px;
+}
+
+.genreThriller {
+	background-position: -1100px;
+}
+
+.genreWar {
+	background-position: -1150px;
+}
+
+.genreWestern {
+	background-position: -1200px;
 }
 
 #detailInformationImage {

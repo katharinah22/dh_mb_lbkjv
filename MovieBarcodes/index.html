@@ -15,6 +15,7 @@
 	<body>
 
         <div class="container">
+            <img id="moviebarcodeLogo" src="res/images/moviebarcodeLogo.png">
             <h1>Moviebarcode</br>Analyzer</h1>
             <div class="row">
                 <div id="filterInputFields" class="col-sm-6 col-md-5 col-lg-4">
@@ -116,25 +117,34 @@
                         <div class="title">movie details: </div>
                         <br class="clear"/>
 
-                        <div id="detailDescriptions">
-                            <div class="detailDescription">year:</div>
-                            <div class="detailDescription">genre:</div>
-                            <div class="detailDescription">director:</div>
-                            <div class="detailDescription">country:</div>
-                            <div class="detailDescription">language:</div>
-                            <div class="detailDescription">runtime:</div>
-                            <div class="detailDescription">cast:</div>
-                        </div>
-                        <div id="detailInformations">
-                            <div id="detailInformationYear">Year:</div>
-                            <div id="detailInformationGenre">Genre:</div>
-                            <div id="detailInformationDirector">Director:</div>
-                            <div id="detailInformationCountry">Country:</div>
-                            <div id="detailInformationLanguage">Language:</div>
-                            <div id="detailInformationRuntime">Runtime:</div>
-                            <div id="detailInformationActors">Actors:</div>
-                        </div>
-                        <br class="clear"/>
+                        <div class="detailDescription">year:</div>
+                        <div id="detailInformationYear" class="detailInformation"></div>
+                        <br class="clear" />
+
+                        <div class="detailDescription">genre:</div>
+                        <div id="detailInformationGenre" class="detailInformation"></div>
+                        <br class="clear" />
+
+                        <div class="detailDescription">director:</div>
+                        <div id="detailInformationDirector" class="detailInformation"></div>
+                        <br class="clear" />
+
+                        <div class="detailDescription">country:</div>
+                        <div id="detailInformationCountry" class="detailInformation"></div>
+                        <br class="clear" />
+
+                        <div class="detailDescription">language:</div>
+                        <div id="detailInformationLanguage" class="detailInformation"></div>
+                        <br class="clear" />
+
+                        <div class="detailDescription">runtime:</div>
+                        <div id="detailInformationRuntime" class="detailInformation"></div>
+                        <br class="clear" />
+
+                        <div class="detailDescription">cast:</div>
+                        <div id="detailInformationActors" class="detailInformation"></div>
+                        <br class="clear" />
+                        
                         <div class="title">plot summary: </div>
                         <div id="detailInformationSummary"></div>
                     </div>
@@ -155,7 +165,9 @@
                     <div class="resultColorItem" id="resultColorItem3" style="background-color:<%= thirdColor %>;"></div>
                 </div>
             </div>
-            <div class='resultTitle'><%= title %></div>
+            <div class="genreImages"></div><br class="clear"/>
+            <div class="resultTitle"><%= title %></div> <div class="resultYear"> (<%= year %>)</div>
+            <br class="clear" />
         </div>
     </script>
 

@@ -12,11 +12,13 @@ MovieBarcodes.ResultsView = (function() {
 		for (var i = 0; i < movies.length; i++) {
 			var id = movies[i].id;
 			var title = movies[i].title; 
+			var year = movies[i].year;
+			var genre = movies[i].genre;
 			var poster = movies[i].poster; 
 			var firstColor = movies[i].firstColor; 
 			var secondColor = movies[i].secondColor; 
 			var thirdColor = movies[i].thirdColor; 
-			addResultItem(id, title, poster, firstColor, secondColor, thirdColor); 
+			addResultItem(id, title, year, genre, poster, firstColor, secondColor, thirdColor); 
 		}
 	}, 
 
@@ -30,6 +32,7 @@ MovieBarcodes.ResultsView = (function() {
 		var item = MovieBarcodes.ResultItem().init({
 			id: options.id,
 			title: options.title,
+			year: options.year, 
 			poster: options.poster,
 			firstColor: options.firstColor, 
 			secondColor: options.secondColor, 
@@ -39,10 +42,11 @@ MovieBarcodes.ResultsView = (function() {
 		$("#results").append($el); 
 	}, 
 
-	addResultItem = function(id, title, poster, firstColor, secondColor, thirdColor) {
+	addResultItem = function(id, title, year, genre, poster, firstColor, secondColor, thirdColor) {
 		makeResultItem({
 			id: id, 
 			title: title,
+			year: year,
 			poster: poster,
 			firstColor: firstColor, 
 			secondColor: secondColor, 
@@ -50,6 +54,9 @@ MovieBarcodes.ResultsView = (function() {
 		});
 		var $resultItem = $("#" + id); 
 		$resultItem.on('click', {'id': id, 'title': title}, onResultItemClick);
+		for (var i = 0; i < genre.length; i++) {
+			$resultItem.find(".genreImages").append('<div class="genreImageContainer genre' + genre[i] + '"><div class="genreImg"></div></div>'); 
+		}
 	}; 
 
 	that.addResults = addResults; 
