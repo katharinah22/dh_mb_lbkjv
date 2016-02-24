@@ -33,6 +33,7 @@ MovieBarcodes.FilterView = (function() {
 		});
 		$("#filterInputFields input").keyup(onSubmitFilter); 
 		$("#genreSelect").on('change', onGenreSelectChange); 
+		$("#sortedBySelect").on('change', onSotrBySelectChange); 
 		$(".colorSelectItem").on('click', onSelectColor); 
 		$("#sortDirectionToggle").on('click', onSortDirecionToggleClick); 
 
@@ -69,6 +70,13 @@ MovieBarcodes.FilterView = (function() {
 		var p = (parameters.length == 0) ? "" : parameters; 
 		var parameter = {parameters: p, sort: sort}; 
     	$(that).trigger('loadNewResults', [parameter]);
+	}, 
+
+	onSotrBySelectChange = function(event) {
+		var selected = $(this).find("option:selected").val();
+		var value = (selected == "genre") ? "storyline.genre" : selected;
+		sort["value"] = value; 
+		adaptResults(); 
 	}, 
 
 	onGenreSelectChange = function(event) {
@@ -109,7 +117,8 @@ MovieBarcodes.FilterView = (function() {
 			toggleButton.append('<span class="zmdi zmdi-long-arrow-up zmdi-hc-lg"></span>'); 
 			sortDirection = "1"; 
 		}
-		sort = {value: "title", sortDirection: sortDirection}; 
+		sort["sortDirection"] = sortDirection; 
+		//sort = {value: "title", sortDirection: sortDirection}; 
 		adaptResults(); 
 	}, 
 
