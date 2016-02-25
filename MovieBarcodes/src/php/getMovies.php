@@ -117,12 +117,14 @@
         $movieData = array(); 
 
         $movie = $myCollection->findOne(array('_id' => $id));
+        $title = $movie['title'];
         $actors = $movie['actors']; 
         $writer = $movie['writer']; 
         $storyline = $movie['storyline']; 
         $genre = $storyline['genre'];
         $summary = $storyline['summary']; 
         $details = $movie['details']; 
+        $dominantColors = $movie['dominantColors'];
         $country = $details['country']; 
         $language = $details['language']; 
         $year = $movie['year']; 
@@ -133,7 +135,7 @@
 
         $moviebarcodeData =  base64_encode($gridFS->findOne(array("_id" => $id))->getBytes());
         $image = "data:image/jpeg;base64, $moviebarcodeData";
-        $movieData = array("image"=>$image, "actors"=>$actors, "country"=>$country, "director"=>$director, "genre"=>$genre, "language"=>$language, "year"=>$year, "runtime"=>$runtime, "summary"=>$summary); 
+        $movieData = array("title"=>$title, "image"=>$image, "actors"=>$actors, "country"=>$country, "director"=>$director, "genre"=>$genre, "language"=>$language, "year"=>$year, "runtime"=>$runtime, "summary"=>$summary, "dominantColors"=>$dominantColors); 
         echo json_encode($movieData);
     }
 ?>

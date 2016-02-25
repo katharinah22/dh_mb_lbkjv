@@ -14,11 +14,16 @@ MovieBarcodes.MainController = (function() {
 		$(mainModel).on('loadResultsAndGenres', onLoadResultsAndGenres); 
 		$(mainModel).on('loadResults', onLoadResults); 
 		$(mainModel).on('loadMovieData', onLoadMovieData); 
+		$(mainModel).on('showMovieDetails', onShowMovieDetails); 
 
 		$(resultsView).on('resultItemClick', onResultItemClick); 
 
 		$(filterView).on('loadNewResults', onLoadNewResults); 
 		$(filterView).on('changeSorting', onChangeSorting); 
+	}, 
+
+	onShowMovieDetails = function(event, movieDetails) {
+		resultsView.showMovieDetails(movieDetails); 
 	}, 
 
 	onChangeSorting = function(event, value, sortDirection) {

@@ -85,8 +85,9 @@ MovieBarcodes.MainModel = (function() {
 	getMovieDetails = function(id, title) {
 		$("#detailInformationTitle").text(title); 
 		$.ajax({url: "src/php/getMovies.php?command=getMovieDetailsByID", data: {id: id}}).done(function(data) {
-			var object = jQuery.parseJSON(data); 
-			$("#detailInformationImage").attr("src", object.image);
+			var movieDetails = jQuery.parseJSON(data); 
+			$(that).trigger('showMovieDetails', movieDetails); 
+			/*$("#detailInformationImage").attr("src", object.image);
 			$("#detailInformationActors").text(object.actors); 
 			$("#detailInformationCountry").text(object.country); 
 			$("#detailInformationDirector").text(object.director); 
@@ -95,8 +96,10 @@ MovieBarcodes.MainModel = (function() {
 			$("#detailInformationYear").text(object.year); 
 			$("#detailInformationRuntime").text(object.runtime); 
 			$("#detailInformationSummary").text(object.summary); 
+			console.log(object.dominantColors);*/
+			//dominantColors['1']['realcolor']
+			//$("#dominantColorsTable tbody")
 		});
-		$("#detailInformationModal").modal('show'); 
 	}; 
 
 

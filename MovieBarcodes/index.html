@@ -75,15 +75,15 @@
 
         <div class="modal fade" id="detailInformationModal" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
+                <div class="modal-content" id="detailInformationContainer">
+                    <!--<div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                         <h4 class="modal-title" id="detailInformationTitle">Title</h4>
                     </div>
                     <div class="modal-body">
                         <img id="detailInformationImage" src="" />
                         <div class="title">dominant colors: </div>
-                        <table class="table table-bordered">
+                        <table class="table table-bordered" id="dominantColorsTable">
                             <thead>
                                 <tr>
                                     <th>color</th>
@@ -147,7 +147,7 @@
                         
                         <div class="title">plot summary: </div>
                         <div id="detailInformationSummary"></div>
-                    </div>
+                    </div>-->
                     
                 </div>
             </div>
@@ -169,6 +169,83 @@
             <div class="resultTitle"><%= title %></div> <div class="resultYear"> (<%= year %>)</div>
             <br class="clear" />
         </div>
+    </script>
+
+    <script type="text/html" id="detailInformation-tpl">
+    
+        <div class="modal-header" id="<%= id %>">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="detailInformationTitle"><%= title %></h4>
+        </div>
+        <div class="modal-body">
+            <img id="detailInformationImage" src="<%= movieBarcode %>" />
+            <div class="title">dominant colors: </div>
+            <table class="table table-bordered" id="dominantColorsTable">
+                <thead>
+                    <tr>
+                        <th>color</th>
+                        <th>hex color</th>
+                        <th>percentage</th>
+                        <th>color name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><div class="dominantColorItem" style="background-color: <%= domCol1Value %>;"></div></td>
+                        <td><%= domCol1Value %></td>
+                        <td><%= domCol1Percentage %></td>
+                        <td><%= domCol1Name %></td>
+                    </tr>
+                    <tr>
+                        <td><div class="dominantColorItem" style="background-color: <%= domCol2Value %>;"></div></td>
+                        <td><%= domCol2Value %></td>
+                        <td><%= domCol2Percentage %></td>
+                        <td><%= domCol2Name %></td>
+                    </tr>
+                    <tr>
+                        <td><div class="dominantColorItem" style="background-color: <%= domCol3Value %>;"></div></td>
+                        <td><%= domCol3Value %></td>
+                        <td><%= domCol3Percentage %></td>
+                        <td><%= domCol3Name %></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="title">movie details: </div>
+            <br class="clear"/>
+
+            <div class="detailDescription">year:</div>
+            <div id="detailInformationYear" class="detailInformation"><%= year %></div>
+            <br class="clear" />
+
+            <div class="detailDescription">genre:</div>
+            <div id="detailInformationGenre" class="detailInformation"><%= genre %></div>
+            <br class="clear" />
+
+            <div class="detailDescription">director:</div>
+            <div id="detailInformationDirector" class="detailInformation"><%= director %></div>
+            <br class="clear" />
+
+            <div class="detailDescription">country:</div>
+            <div id="detailInformationCountry" class="detailInformation"><%= country %></div>
+            <br class="clear" />
+
+            <div class="detailDescription">language:</div>
+            <div id="detailInformationLanguage" class="detailInformation"><%= language %></div>
+            <br class="clear" />
+
+            <div class="detailDescription">runtime:</div>
+            <div id="detailInformationRuntime" class="detailInformation"><%= runtime %></div>
+            <br class="clear" />
+
+            <div class="detailDescription">cast:</div>
+            <div id="detailInformationActors" class="detailInformation"><%= cast %></div>
+            <br class="clear" />
+                        
+            <div class="title">plot summary: </div>
+            <div id="detailInformationSummary"><%= summary %></div>
+        </div>
+  
     </script>
 
     <script type="text/html" id="filterItem-tpl"> 
@@ -193,6 +270,7 @@
     <script src="src/FilterView.js"></script>
     <script src="src/ResultsView.js"></script>
     <script src="src/ResultItem.js"></script>
+    <script src="src/DetailInformationItem.js"></script>
     <script src="src/FilterItem.js"></script>
 
     <script>

@@ -57,9 +57,87 @@ MovieBarcodes.ResultsView = (function() {
 		for (var i = 0; i < genre.length; i++) {
 			$resultItem.find(".genreImages").append('<div class="genreImageContainer genre' + genre[i] + '"><div class="genreImg"></div></div>'); 
 		}
+	}, 
+
+	makeDetailInformationItem = function(options) {
+		var item = MovieBarcodes.DetailInformationItem().init({
+			id: options.id,
+			title: options.title,
+			movieBarcode: options.movieBarcode,
+			year: options.year, 
+			genre: options.genre, 
+			director: options.director,
+			country: options.country,
+			language: options.language,
+			runtime: options.runtime,
+			cast: options.cast,
+			summary: options.summary, 
+			domCol1Value: options.domCol1Value,
+		    domCol1Percentage: options.domCol1Percentage,
+		    domCol1Name: options.domCol1Name,
+		    domCol2Value: options.domCol2Value,
+		    domCol2Percentage: options.domCol2Percentage,
+		    domCol2Name: options.domCol2Name,
+		    domCol3Value: options.domCol3Value,
+		    domCol3Percentage: options.domCol3Percentage,
+		    domCol3Name: options.domCol3Name
+		}); 
+		var $el = item.render(); 
+		$("#detailInformationContainer").empty().append($el); 
+	}, 
+
+	addDetailInformationItem = function(id, title, movieBarcode, year, genre, director, country, language, runtime, cast, summary, domCol1Value, domCol1Percentage, domCol1Name, domCol2Value, domCol2Percentage, domCol2Name, domCol3Value, domCol3Percentage, domCol3Name) {
+		makeDetailInformationItem({
+			id: id, 
+			title: title,
+			movieBarcode: movieBarcode,
+			year: year,
+			genre: genre, 
+			director: director,
+			country: country,
+			language: language,
+			runtime: runtime,
+			cast: cast,
+			summary: summary, 
+			domCol1Value: domCol1Value,
+		    domCol1Percentage: domCol1Percentage,
+		    domCol1Name: domCol1Name,
+		    domCol2Value: domCol2Value,
+		    domCol2Percentage: domCol2Percentage,
+		    domCol2Name: domCol2Name,
+		    domCol3Value: domCol3Value,
+		    domCol3Percentage: domCol3Percentage,
+		    domCol3Name: domCol3Name
+		});
+		$("#detailInformationModal").modal('show'); 
+	}, 
+
+	showMovieDetails = function(movieDetails) {
+		console.log(movieDetails); 
+		var id = "detailInformation";
+		var dominantColors = movieDetails.dominantColors;
+
+		var domCol1 = dominantColors['1'];
+		var domCol2 = dominantColors['2'];
+		var domCol3 = dominantColors['3'];
+
+		var domCol1Value = domCol1['realcolor'];
+		var domCol1Percentage = domCol1['percent'];
+		var domCol1Name = domCol1['clusteredcolor'];
+
+		var domCol2Value = domCol2['realcolor'];
+		var domCol2Percentage = domCol2['percent'];
+		var domCol2Name = domCol2['clusteredcolor'];
+
+		var domCol3Value = domCol3['realcolor'];
+		var domCol3Percentage = domCol3['percent'];
+		var domCol3Name = domCol3['clusteredcolor'];
+
+		addDetailInformationItem(id, movieDetails.title, movieDetails.image, movieDetails.year, movieDetails.genre, movieDetails.director, movieDetails.country, movieDetails.language, movieDetails.runtime, movieDetails.actors, movieDetails.summary, domCol1Value, domCol1Percentage, domCol1Name, domCol2Value, domCol2Percentage, domCol2Name, domCol3Value, domCol3Percentage, domCol3Name)
 	}; 
 
 	that.addResults = addResults; 
+	that.showMovieDetails = showMovieDetails; 
 	that.init = init; 
 	return that; 
 })();
