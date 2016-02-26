@@ -36,6 +36,7 @@ MovieBarcodes.FilterView = (function() {
 		$("#sortedBySelect").on('change', onSotrBySelectChange); 
 		$(".colorSelectItem").on('click', onSelectColor); 
 		$("#sortDirectionToggle").on('click', onSortDirecionToggleClick); 
+		$("#resetFiltersButton").on('click', onResetFilterButtonClick); 
 
 		return that; 
 	}, 
@@ -64,6 +65,14 @@ MovieBarcodes.FilterView = (function() {
 			adaptResults();  
     		addFilterItem(key, value); 
 		}
+	}, 
+
+	onResetFilterButtonClick = function(event) {
+		parameters = []; 
+		$(".filter").each(function() {
+			$(this).remove(); 
+		});
+		adaptResults(); 
 	}, 
 
 	adaptResults = function() {

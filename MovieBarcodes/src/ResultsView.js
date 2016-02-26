@@ -18,7 +18,12 @@ MovieBarcodes.ResultsView = (function() {
 			var firstColor = movies[i].firstColor; 
 			var secondColor = movies[i].secondColor; 
 			var thirdColor = movies[i].thirdColor; 
-			addResultItem(id, title, year, genre, poster, firstColor, secondColor, thirdColor); 
+			if (poster == "") {
+				var image = "res/images/noPosterAvailable.png"; 
+			} else {
+				var image = poster;
+			}
+			addResultItem(id, title, year, genre, image, firstColor, secondColor, thirdColor); 
 		}
 	}, 
 
@@ -56,6 +61,9 @@ MovieBarcodes.ResultsView = (function() {
 		$resultItem.on('click', {'id': id, 'title': title}, onResultItemClick);
 		for (var i = 0; i < genre.length; i++) {
 			$resultItem.find(".genreImages").append('<div class="genreImageContainer genre' + genre[i] + '"><div class="genreImg"></div></div>'); 
+		}
+		if (poster == "res/images/noPosterAvailable.png") {
+			$resultItem.find("img").addClass("noImageAvailable");
 		}
 	}, 
 

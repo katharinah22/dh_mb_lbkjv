@@ -19,7 +19,7 @@ __author__ = 'katharina hafner'
 # 19/02/16          get subtitles from OpenSubtitles.org
 # 21/02/16          insert registered UserAgent account (OpenSubtitles) + first try to format subtitles
 # 22/02/16          format subtitle string (remove unnecessary characters and numbers)
-
+# 24/02/16          select subtitles with the best ratings
 
 import urllib.parse
 from urllib import parse
@@ -39,7 +39,7 @@ import argparse
 import numpy as np
 
 from PIL import Image
-
+from colormap import rgb2hex
 import cv2
 from sklearn.cluster import KMeans
 
@@ -58,6 +58,7 @@ except ImportError:
         from HTMLParser import HTMLParser  # python 2.x
     unescape = HTMLParser().unescape
 
+from textProcessing import lemmatize
 
 def get_content(link):
     # Crawl Website Moviebarcodes.tumblr.com/movie-index
@@ -408,18 +409,20 @@ def get_dominant_colors_by_colordiff(db, fs, l_post_id):
     dominant_colors = {}
     for (percent, color) in zip(hist, clt.cluster_centers_):
         print(percent)
-        color_R = color[0]
-        color_G = color[1]
-        color_B = color[2]
+        color_R = int(color[0])
+        color_G = int(color[1])
+        color_B = int(color[2])
         #real_color = "{ R: " + str(color_R) + ", G: " + str(color_G) + ", B: " + str(color_B) + " }"
         real_color = "rgb(" + str(color_R) + ", " + str(color_G) + ", " + str(color_B) + ")"
         print(real_color) 
+        real_color_hex = rgb2hex(color_R, color_G, color_B)
+        print(real_color_hex) 
         # response = muterun_js('colorDiffTest.js ' + str(color_R) + ' ' + str(color_G) + ' ' + str(color_B))
         response = muterun_js('color-diff.js ' + str(color_R) + ' ' + str(color_G) + ' ' + str(color_B))
         clustered_color = response.stdout.rstrip().decode('ascii')
         print(clustered_color)
         dominant_colors[str(count)] = {
-            "realcolor": real_color,
+            "realcolor": real_color_hex,
             "percent": percent, 
             "clusteredcolor": clustered_color
         }
@@ -489,7 +492,7 @@ def get_dominant_color_by_colorthief(db, fs, l_post_id):
     debugKH(arr_domcol_hex)
     store_domcol_to_db(db, l_post_id, dominat_color, arr_domcol_hex)
 
-
+#unused
 def store_domcol_to_db(db, l_post_id, dominat_color, arr_domcol_hex):
     if db.movie.find_one({"_id": l_post_id}):
         debugKH("UPDATE" + l_post_id)
@@ -548,24 +551,40 @@ def store_domcol_to_db(db, l_post_id, dominat_color, arr_domcol_hex):
 def get_subtitles(db, l_post_id, l_imdbid):
     try:
         server = ServerProxy('http://api.opensubtitles.org/xml-rpc')
-        token = server.LogIn('dh_moviebarcodes', 'dh_ws2015', 'en', 'Moviebarcode Analyzer')['token']
+        token = server.LogIn('dh_moviebarcodes', 'dh_ws2015', 'eng', 'Moviebarcode Analyzer')['token']
         imdb_id = int(l_imdbid[2:])
         search_request = []
-        search_request.append({'imdbid': imdb_id, 'sublanguageid': 'en'})
+        search_request.append({'imdbid': imdb_id, 'sublanguageid': 'eng'})
         resp = server.SearchSubtitles(token, search_request)
         subtitle_id = []
-        subtitle_id.append(resp['data'][0]['IDSubtitle'])
-        subtitle_data = server.DownloadSubtitles(token, subtitle_id)
+        try:
+            sub = get_best_subtitle(resp['data'])
+            subtitle_id.append(sub['IDSubtitleFile'])
+            subtitle_data = server.DownloadSubtitles(token, subtitle_id)
+        except IndexError:
+            print("No subtitle available")
+            return ""
         if subtitle_data['status'] == '200 OK':
             compressed_data = subtitle_data['data'][0]['data']
             decoded_subtitle = base64.b64decode(compressed_data)
             # subtitle in byte format
             decoded_subtitle = gzip.GzipFile(fileobj=io.BytesIO(decoded_subtitle)).read()
             clean_subtitle = remove_invalid_characters(decoded_subtitle)
-            print(clean_subtitle)
             store_subtitles_to_db(db, l_post_id, clean_subtitle)
+            lemmatization = lemmatize(clean_subtitle)
+            print(lemmatization)
     except ValueError:
         print("No subtitle available")
+
+# get SubtitleID with the best rating
+def get_best_subtitle(array):
+    highest_rating = 0.0
+    best_subtitle = array[0]
+    for s in array:
+        if float(s['SubRating'])>highest_rating:
+            highest_rating = float(s['SubRating'])
+            best_subtitle = s
+    return best_subtitle
 
 
 def store_subtitles_to_db(db, l_post_id, subtitle):

@@ -22,6 +22,8 @@
                     <div id="selectedFilters">
                         
                     </div>
+                    <button class="btn btn-default" id="resetFiltersButton">reset filters</button>
+                    <br class="clear" />
                     <div class="title">title: </div>
                     <input type="text" class="form-control" id="titleInput">
 
@@ -56,6 +58,13 @@
                 </div>
                 <div id="resultView" class="col-sm-6 col-md-7 col-lg-8">
                     <div id="toolbar">
+                        <div class="input-group" id="search">
+                            <input type="text" class="form-control" placeholder="">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">Search</button>
+                            </span>
+                        </div>
+
                         <div class="title">sorted by: </div>
                         <select class="selectpicker" id="sortedBySelect">
                             <option>title</option>
