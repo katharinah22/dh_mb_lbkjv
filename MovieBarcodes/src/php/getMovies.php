@@ -30,6 +30,10 @@
             $init = false; 
             getAllMovies($parameters, $sort, $init);
             break; 
+        case 'getMoviesForListView':
+            ChromePhp::log("hi");
+            getMoviesForListView(); 
+            break;
         default: 
             return; 
     }
@@ -45,8 +49,6 @@
                 $parameter = $parameters[$i]; 
                 $key = $parameter['key']; 
                 $value = $parameter['value']; 
-                ChromePhp::log($key);
-                ChromePhp::log($value);
                 if(isset($value['gte']) && isset($value['lte'])) {
                     $value = array('$gte' => (int) $value['gte'], '$lte' => (int) $value['lte']);
                 } else if($value[0] == "/") {
@@ -54,7 +56,6 @@
                 }
                 $p[$key] = $value; 
             }
-            ChromePhp::log($p);
             $results = $myCollection->find($p);          
         }
 
@@ -80,8 +81,7 @@
             $storyline = $movie['storyline'];
             $genre = $storyline['genre'];
             $genresOfThisMovie = split(", ", $genre);
-            if($init) {
-                
+            if($init) {                
                 for ($i = 0; $i < count($genresOfThisMovie); $i++) {
                     $currentGenre = $genresOfThisMovie[$i]; 
                     //echo (strcmp($currentGenre, 'N/A') != 0); 
@@ -110,6 +110,33 @@
             $result = $movies; 
         }
         echo json_encode($result);
+    }
+
+    function getMoviesForListView() {
+        global $myCollection, $gridFS;
+        $movies = array(); 
+        $results = $myCollection->find();
+        foreach ($results as $movie) {
+            $id = $movie['_id']; 
+            //ChromePhp::log($id);
+            $title = $movie['title'];
+            $year = $movie['year'];
+            //ChromePhp::log($year);
+            $director = $movie['director'];
+            //ChromePhp::log($director);
+            $storyline = $movie['storyline']; 
+            $genre = $storyline['genre'];
+            //ChromePhp::log($genre);
+            $details = $movie['details']; 
+            $country = $details['country']; 
+            //ChromePhp::log($country);
+            $dominantColors = $movie['dominantColors']; 
+            //ChromePhp::log($dominantColors);
+
+            $movies[] = array("id"=>$id, "title"=>$title, "year"=>$year, "director"=>$director, "genre"=>$genre, "country"=>$country, "dominantColors"=>$dominantColors); 
+            
+        }
+        echo json_encode($movies);
     }
 
     function getMovieDetailsByID($id) {

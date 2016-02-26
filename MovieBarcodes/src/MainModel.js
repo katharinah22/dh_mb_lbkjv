@@ -7,8 +7,6 @@ MovieBarcodes.MainModel = (function() {
 		initSpinner(); 
 		var data = {parameters: "", sort: {value: "title", sortDirection: "1"}}; 
 		getAllMovies(data); 
-		/*var data = {parameters: [{key: "year", value: "2004"}]}; 
-		getAllMovies(data); */
 		return that; 
 	},  
 
@@ -60,10 +58,20 @@ MovieBarcodes.MainModel = (function() {
 		});
 	}, 
 
+	getMoviesForListView = function() {
+		console.log("getMoviesForListView");
+		startSpinner(); 
+		$.ajax({url: "src/php/getMovies.php?command=getMoviesForListView"}).done(function(data) {
+			var movies = jQuery.parseJSON(data);
+			console.log(movies); 
+			$(that).trigger('loadResultListItems', [movies]); 
+			stopSpinner();
+		});
+	}, 
+
 	getAllMovies = function(data) {
 		startSpinner(); 
 		$.ajax({url: "src/php/getMovies.php?command=getAllMovies", data: data}).done(function(data) {
-			//$(that).trigger('loadResults', [data]); 
 			var object = jQuery.parseJSON(data);
 			var movies = object.movies; 
 			var genres = object.genres; 
@@ -87,18 +95,6 @@ MovieBarcodes.MainModel = (function() {
 		$.ajax({url: "src/php/getMovies.php?command=getMovieDetailsByID", data: {id: id}}).done(function(data) {
 			var movieDetails = jQuery.parseJSON(data); 
 			$(that).trigger('showMovieDetails', movieDetails); 
-			/*$("#detailInformationImage").attr("src", object.image);
-			$("#detailInformationActors").text(object.actors); 
-			$("#detailInformationCountry").text(object.country); 
-			$("#detailInformationDirector").text(object.director); 
-			$("#detailInformationGenre").text(object.genre); 
-			$("#detailInformationLanguage").text(object.language);
-			$("#detailInformationYear").text(object.year); 
-			$("#detailInformationRuntime").text(object.runtime); 
-			$("#detailInformationSummary").text(object.summary); 
-			console.log(object.dominantColors);*/
-			//dominantColors['1']['realcolor']
-			//$("#dominantColorsTable tbody")
 		});
 	}; 
 
@@ -106,6 +102,7 @@ MovieBarcodes.MainModel = (function() {
 	that.init = init; 
 	that.getMovies = getMovies; 
 	that.getMovieDetails = getMovieDetails; 
+	that.getMoviesForListView = getMoviesForListView; 
 	that.sortResults = sortResults; 
 	return that; 
 })(); 

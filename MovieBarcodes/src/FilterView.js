@@ -37,8 +37,13 @@ MovieBarcodes.FilterView = (function() {
 		$(".colorSelectItem").on('click', onSelectColor); 
 		$("#sortDirectionToggle").on('click', onSortDirecionToggleClick); 
 		$("#resetFiltersButton").on('click', onResetFilterButtonClick); 
+		$("#showResultListButton").on('click', onShowResultListButtonClick); 
 
 		return that; 
+	}, 
+
+	onShowResultListButtonClick = function(event) {
+		$(that).trigger('showResultList');
 	}, 
 
 	onSelectColor = function(event) {

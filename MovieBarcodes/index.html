@@ -74,8 +74,8 @@
                             <option>country</option>
                         </select>
                         <button class="btn btn-default button ascending" id="sortDirectionToggle"><span class="zmdi zmdi-long-arrow-up zmdi-hc-lg"></span></button>
-                        <button class="btn btn-default button layoutButton"><span class="zmdi zmdi-view-list zmdi-hc-2x"></span></button>
-                        <button class="btn btn-default button layoutButton"><span class="zmdi zmdi-view-module zmdi-hc-2x"></span></button>
+                        <button class="btn btn-default button layoutButton" id="showResultListButton"><span class="zmdi zmdi-view-list zmdi-hc-2x"></span></button>
+                        <button class="btn btn-default button layoutButton" id="showResultModuleButton"><span class="zmdi zmdi-view-module zmdi-hc-2x"></span></button>
                     </div>
                     <div id="results"></div>
                 </div>
@@ -85,78 +85,6 @@
         <div class="modal fade" id="detailInformationModal" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content" id="detailInformationContainer">
-                    <!--<div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title" id="detailInformationTitle">Title</h4>
-                    </div>
-                    <div class="modal-body">
-                        <img id="detailInformationImage" src="" />
-                        <div class="title">dominant colors: </div>
-                        <table class="table table-bordered" id="dominantColorsTable">
-                            <thead>
-                                <tr>
-                                    <th>color</th>
-                                    <th>hex color</th>
-                                    <th>percentage</th>
-                                    <th>color name</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><div class="dominantColorItem" id="colorSelectItem12"></div></td>
-                                    <td>#3f352d</td>
-                                    <td>55%</td>
-                                    <td>brown</td>
-                                </tr>
-                                <tr>
-                                    <td><div class="dominantColorItem" id="colorSelectItem11"></div></td>
-                                    <td>#201c1f</td>
-                                    <td>29%</td>
-                                    <td>black</td>
-                                </tr>
-                                <tr>
-                                    <td><div class="dominantColorItem" id="colorSelectItem10"></div></td>
-                                    <td>#867c62</td>
-                                    <td>6%</td>
-                                    <td>gray</td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                        <div class="title">movie details: </div>
-                        <br class="clear"/>
-
-                        <div class="detailDescription">year:</div>
-                        <div id="detailInformationYear" class="detailInformation"></div>
-                        <br class="clear" />
-
-                        <div class="detailDescription">genre:</div>
-                        <div id="detailInformationGenre" class="detailInformation"></div>
-                        <br class="clear" />
-
-                        <div class="detailDescription">director:</div>
-                        <div id="detailInformationDirector" class="detailInformation"></div>
-                        <br class="clear" />
-
-                        <div class="detailDescription">country:</div>
-                        <div id="detailInformationCountry" class="detailInformation"></div>
-                        <br class="clear" />
-
-                        <div class="detailDescription">language:</div>
-                        <div id="detailInformationLanguage" class="detailInformation"></div>
-                        <br class="clear" />
-
-                        <div class="detailDescription">runtime:</div>
-                        <div id="detailInformationRuntime" class="detailInformation"></div>
-                        <br class="clear" />
-
-                        <div class="detailDescription">cast:</div>
-                        <div id="detailInformationActors" class="detailInformation"></div>
-                        <br class="clear" />
-                        
-                        <div class="title">plot summary: </div>
-                        <div id="detailInformationSummary"></div>
-                    </div>-->
                     
                 </div>
             </div>
@@ -257,6 +185,51 @@
   
     </script>
 
+    <script type="text/html" id="resultList-tpl">
+            <table class="table table-bordered" id="<%= id %>">
+                <thead>
+                    <tr>
+                        <th>colors</th>
+                        <th>title</th>
+                        <th>year</th>
+                        <th>director</th>
+                        <th>genre</th>
+                        <th>country</th>
+                    </tr>
+                </thead>
+                <tbody id="resultListItemContainer">
+                    
+                </tbody>
+            </table>
+    </script>
+
+    <script type="text/html" id="resultListItem-tpl">
+        <tr id="<%= id %>">
+            <td>
+                <div class="dominantColors">
+                    <div class="dominantColorItem" style="background-color: <%= domCol1Value %>;"></div>
+                    <div><%= domCol1Name %></div>
+                    <div><%= domCol1Percentage %></div>
+                </div>
+                <div class="dominantColors">
+                    <div class="dominantColorItem" style="background-color: <%= domCol2Value %>;"></div>
+                    <div><%= domCol2Name %></div>
+                    <div><%= domCol2Percentage %></div>
+                </div>
+                <div class="dominantColors">
+                    <div class="dominantColorItem" style="background-color: <%= domCol3Value %>;"></div>
+                    <div><%= domCol3Name %></div>
+                    <div><%= domCol3Percentage %></div>
+                </div>
+            </td>
+            <td><%= title %></td>
+            <td><%= year %></td>
+            <td><%= director %></td>
+            <td><%= genre %></td>
+            <td><%= country %></td>
+        </tr>
+    </script>
+
     <script type="text/html" id="filterItem-tpl"> 
         <div class="filter <%= filterType %>Filter" id="<%= id %>">
             <button class="btn btn-default button closeButton">
@@ -281,6 +254,8 @@
     <script src="src/ResultItem.js"></script>
     <script src="src/DetailInformationItem.js"></script>
     <script src="src/FilterItem.js"></script>
+    <script src="src/ResultList.js"></script>
+    <script src="src/ResultListItem.js"></script>
 
     <script>
         MovieBarcodes.init();    

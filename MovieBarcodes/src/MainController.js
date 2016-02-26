@@ -14,12 +14,24 @@ MovieBarcodes.MainController = (function() {
 		$(mainModel).on('loadResultsAndGenres', onLoadResultsAndGenres); 
 		$(mainModel).on('loadResults', onLoadResults); 
 		$(mainModel).on('loadMovieData', onLoadMovieData); 
+		$(mainModel).on('loadResultListItems', onLoadResultListItems); 
 		$(mainModel).on('showMovieDetails', onShowMovieDetails); 
 
 		$(resultsView).on('resultItemClick', onResultItemClick); 
+		$(resultsView).on('getMoviesForListView', onGetMoviesForListView); 
 
 		$(filterView).on('loadNewResults', onLoadNewResults); 
 		$(filterView).on('changeSorting', onChangeSorting); 
+		$(filterView).on('showResultList', onShowResultList); 
+	}, 
+
+	onGetMoviesForListView = function(event) {
+		console.log("onGetMoviesForListView");
+		mainModel.getMoviesForListView(); 
+	}, 
+
+	onShowResultList = function(event) {
+		resultsView.addResultList(); 
 	}, 
 
 	onShowMovieDetails = function(event, movieDetails) {
@@ -45,6 +57,10 @@ MovieBarcodes.MainController = (function() {
 
 	onLoadResults = function(event, movies) {
 		resultsView.addResults(movies); 
+	}, 
+
+	onLoadResultListItems = function(event, movies) {
+		resultsView.loadResultListItems(movies); 
 	}, 
 
 	onLoadMovieData = function(event, poster, title, actors, country, director, genre, language, year, runtime) {

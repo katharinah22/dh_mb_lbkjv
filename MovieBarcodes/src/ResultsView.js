@@ -27,6 +27,36 @@ MovieBarcodes.ResultsView = (function() {
 		}
 	}, 
 
+	loadResultListItems = function(movies) {
+		console.log(movies); 
+		for (var i = 0; i < movies.length; i++) {
+			var id = movies[i].id;
+			var title = movies[i].title; 
+			var year = movies[i].year;
+			var director = movies[i].director;
+			var genre = movies[i].genre;
+			var country = movies[i].country; 
+			var dominantColors = movies[i].dominantColors; 
+
+			var domCol1 = dominantColors['1'];
+			var domCol2 = dominantColors['2'];
+			var domCol3 = dominantColors['3'];
+
+			var domCol1Value = domCol1['realcolor'];
+			var domCol1Percentage = domCol1['percent'];
+			var domCol1Name = domCol1['clusteredcolor'];
+
+			var domCol2Value = domCol2['realcolor'];
+			var domCol2Percentage = domCol2['percent'];
+			var domCol2Name = domCol2['clusteredcolor'];
+
+			var domCol3Value = domCol3['realcolor'];
+			var domCol3Percentage = domCol3['percent'];
+			var domCol3Name = domCol3['clusteredcolor'];
+			addResultListItem(id, title, year, director, genre, country, domCol1Value, domCol1Percentage, domCol1Name, domCol2Value, domCol2Percentage, domCol2Name, domCol3Value, domCol3Percentage, domCol3Name); 
+		}
+	}, 
+
 	onResultItemClick = function(event) {
 		var id = event.data.id; 
 		var title = event.data.title; 
@@ -121,7 +151,6 @@ MovieBarcodes.ResultsView = (function() {
 	}, 
 
 	showMovieDetails = function(movieDetails) {
-		console.log(movieDetails); 
 		var id = "detailInformation";
 		var dominantColors = movieDetails.dominantColors;
 
@@ -142,10 +171,69 @@ MovieBarcodes.ResultsView = (function() {
 		var domCol3Name = domCol3['clusteredcolor'];
 
 		addDetailInformationItem(id, movieDetails.title, movieDetails.image, movieDetails.year, movieDetails.genre, movieDetails.director, movieDetails.country, movieDetails.language, movieDetails.runtime, movieDetails.actors, movieDetails.summary, domCol1Value, domCol1Percentage, domCol1Name, domCol2Value, domCol2Percentage, domCol2Name, domCol3Value, domCol3Percentage, domCol3Name)
+	}, 
+
+	makeResultList = function(options) {
+		var item = MovieBarcodes.ResultList().init({
+			id: options.id
+		}); 
+		var $el = item.render(); 
+		$("#results").empty().append($el);
+	}, 
+
+	addResultList = function() {
+		makeResultList({
+			id: "resultList"
+		});
+		$(that).trigger('getMoviesForListView'); 
+	}, 
+
+	makeResultListItem = function(options) {
+		var item = MovieBarcodes.ResultListItem().init({
+			id: options.id,
+			title: options.title,
+			year: options.year, 
+			director: options.director,
+			genre: options.genre, 
+			country: options.country,
+			domCol1Value: options.domCol1Value,
+		    domCol1Percentage: options.domCol1Percentage,
+		    domCol1Name: options.domCol1Name,
+		    domCol2Value: options.domCol2Value,
+		    domCol2Percentage: options.domCol2Percentage,
+		    domCol2Name: options.domCol2Name,
+		    domCol3Value: options.domCol3Value,
+		    domCol3Percentage: options.domCol3Percentage,
+		    domCol3Name: options.domCol3Name
+		}); 
+		var $el = item.render(); 
+		$("#resultListItemContainer").append($el); 
+	}, 
+
+	addResultListItem = function(id, title, year, director, genre, country, domCol1Value, domCol1Percentage, domCol1Name, domCol2Value, domCol2Percentage, domCol2Name, domCol3Value, domCol3Percentage, domCol3Name) {
+		makeResultListItem({
+			id: id, 
+			title: title,
+			year: year,
+			director: director,
+			genre: genre, 
+			country: country,
+			domCol1Value: domCol1Value,
+		    domCol1Percentage: domCol1Percentage,
+		    domCol1Name: domCol1Name,
+		    domCol2Value: domCol2Value,
+		    domCol2Percentage: domCol2Percentage,
+		    domCol2Name: domCol2Name,
+		    domCol3Value: domCol3Value,
+		    domCol3Percentage: domCol3Percentage,
+		    domCol3Name: domCol3Name
+		});
 	}; 
 
 	that.addResults = addResults; 
-	that.showMovieDetails = showMovieDetails; 
+	that.showMovieDetails = showMovieDetails;
+	that.addResultList = addResultList;  
+	that.loadResultListItems = loadResultListItems; 
 	that.init = init; 
 	return that; 
 })();
