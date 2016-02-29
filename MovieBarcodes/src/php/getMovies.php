@@ -118,20 +118,14 @@
         $results = $myCollection->find();
         foreach ($results as $movie) {
             $id = $movie['_id']; 
-            //ChromePhp::log($id);
             $title = $movie['title'];
             $year = $movie['year'];
-            //ChromePhp::log($year);
             $director = $movie['director'];
-            //ChromePhp::log($director);
             $storyline = $movie['storyline']; 
             $genre = $storyline['genre'];
-            //ChromePhp::log($genre);
             $details = $movie['details']; 
             $country = $details['country']; 
-            //ChromePhp::log($country);
-            $dominantColors = $movie['dominantColors']; 
-            //ChromePhp::log($dominantColors);
+            $dominantColors = $movie['dominantColors'];
 
             $movies[] = array("id"=>$id, "title"=>$title, "year"=>$year, "director"=>$director, "genre"=>$genre, "country"=>$country, "dominantColors"=>$dominantColors); 
             

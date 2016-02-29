@@ -107,7 +107,7 @@ def process_file(file):
             l_year = ((re.search(p_year, line)).group(0))[1:-1]    # rm 1 char from both sides of the match
             l_title = ((re.search(p_title, line)).group(0))[1:-2]  # rm 1 from left, 2 from right side
 
-            debugKH("MATCH:" + line)
+            #debugKH("MATCH:" + line)
             debugKH(" __Id: " + l_post_id + " | __Film: " + l_title + " | __Jahr: " + l_year)
 
             # fetch jpg from original url
@@ -218,13 +218,13 @@ def process_file(file):
                       l_imdb_votes, l_type, l_rated, l_poster)
 #            '''
             # fill mongodb
-            fill_collection(db, fs, l_post_id, l_imdbid, l_title, l_year, l_image, l_actors, l_country,
-                            l_director, l_writer, l_genre, l_language, l_released, l_runtime, l_plot,
-                            l_imdb_rating, l_awards, l_metascore, l_imdb_votes, l_type, l_rated, l_poster)
+            #fill_collection(db, fs, l_post_id, l_imdbid, l_title, l_year, l_image, l_actors, l_country,
+            #                l_director, l_writer, l_genre, l_language, l_released, l_runtime, l_plot,
+            #                l_imdb_rating, l_awards, l_metascore, l_imdb_votes, l_type, l_rated, l_poster)
 #            '''
             # get dominant colors of each moviebarcode-image
             # get_dominant_color_by_colorthief(db, fs, l_post_id)   # unused
-            get_dominant_colors_by_colordiff(db, fs, l_post_id) 
+            #get_dominant_colors_by_colordiff(db, fs, l_post_id) 
             get_subtitles(db, l_post_id, l_imdbid)
             print('\n')
 
@@ -423,15 +423,16 @@ def get_dominant_colors_by_colordiff(db, fs, l_post_id):
         print(clustered_color)
         dominant_colors[str(count)] = {
             "realcolor": real_color_hex,
-            "percent": percent, 
+            "percent": int(percent * 100), 
             "clusteredcolor": clustered_color
         }
         count += 1
     print(dominant_colors)
     # return dominant_colors
-    store_colors_by_colordiff_to_db(db, l_post_id, dominant_colors)
+    #store_colors_by_colordiff_to_db(db, l_post_id, dominant_colors)
+    update_value_in_db(db, l_post_id, "dominantColors", dominant_colors)
 
-
+#unused
 def store_colors_by_colordiff_to_db(db, l_post_id, dominant_colors):
     print(dominant_colors)
     if db.movie.find_one({"_id": l_post_id}):
@@ -570,9 +571,15 @@ def get_subtitles(db, l_post_id, l_imdbid):
             # subtitle in byte format
             decoded_subtitle = gzip.GzipFile(fileobj=io.BytesIO(decoded_subtitle)).read()
             clean_subtitle = remove_invalid_characters(decoded_subtitle)
-            store_subtitles_to_db(db, l_post_id, clean_subtitle)
-            lemmatization = lemmatize(clean_subtitle)
-            print(lemmatization)
+            print(clean_subtitle)
+            #store_subtitles_to_db(db, l_post_id, clean_subtitle)
+            allLemmasAndMostFrequentLemmas = lemmatize(clean_subtitle)
+            print(allLemmasAndMostFrequentLemmas[0])
+            print(allLemmasAndMostFrequentLemmas[1])
+            #store_subtitles_to_db(db, l_post_id, allLemmasAndMostFrequentLemmas[0])
+            #store_mostFrequentLemmas_to_db(db, l_post_id, allLemmasAndMostFrequentLemmas[1])
+            update_value_in_db(db, l_post_id, "subtitlesLemmatisation", allLemmasAndMostFrequentLemmas[0])
+            update_value_in_db(db, l_post_id, "subtitlesMostFrequentWords", allLemmasAndMostFrequentLemmas[1])
     except ValueError:
         print("No subtitle available")
 
@@ -586,7 +593,37 @@ def get_best_subtitle(array):
             best_subtitle = s
     return best_subtitle
 
+def update_value_in_db(db, l_post_id, key, value):
+        print("update_value_in_db")
+        print(value)
+        if db.movie.find_one({"_id": l_post_id}):
+            debugKH("UPDATE" + l_post_id)
+            try:
+                db.movie.update(
+                    {"_id": l_post_id},
+                    {
+                        '$set': {key: value}
+                    },
+                    upsert=False
+                )
+            except Exception as e:
+                print(e)
+        elif db.serie.find_one({"_id": l_post_id}):
+            debugKH("UPDATE" + l_post_id)
+            try:
+                db.serie.update(
+                    {"_id": l_post_id},
+                    {
+                        '$set': {key: value}
+                    },
+                    upsert=False
+                )
+            except Exception as e:
+                print(e)
+        else:
+            print("no entry for ", l_post_id)
 
+#unused
 def store_subtitles_to_db(db, l_post_id, subtitle):
         print("Subtitle", subtitle)
         if db.movie.find_one({"_id": l_post_id}):
@@ -616,6 +653,34 @@ def store_subtitles_to_db(db, l_post_id, subtitle):
         else:
             print("no entry for ", l_post_id)
 
+def store_mostFrequentLemmas_to_db(db, l_post_id, mostFrequentLemmas):
+        print("mostFrequentLemmas", mostFrequentLemmas)
+        if db.movie.find_one({"_id": l_post_id}):
+            debugKH("UPDATE" + l_post_id)
+            try:
+                db.movie.update(
+                    {"_id": l_post_id},
+                    {
+                        '$set': {"mostFrequentLemmas": mostFrequentLemmas}
+                    },
+                    upsert=False
+                )
+            except Exception as e:
+                print(e)
+        elif db.serie.find_one({"_id": l_post_id}):
+            debugKH("UPDATE" + l_post_id)
+            try:
+                db.serie.update(
+                    {"_id": l_post_id},
+                    {
+                        '$set': {"mostFrequentLemmas": mostFrequentLemmas}
+                    },
+                    upsert=False
+                )
+            except Exception as e:
+                print(e)
+        else:
+            print("no entry for ", l_post_id)
 
 # removes numbers, special characters, control characters and tags
 def remove_invalid_characters(decoded_subtitle):

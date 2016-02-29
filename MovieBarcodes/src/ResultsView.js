@@ -110,6 +110,7 @@ MovieBarcodes.ResultsView = (function() {
 			runtime: options.runtime,
 			cast: options.cast,
 			summary: options.summary, 
+			mostFrequentWords: options.mostFrequentWords, 
 			domCol1Value: options.domCol1Value,
 		    domCol1Percentage: options.domCol1Percentage,
 		    domCol1Name: options.domCol1Name,
@@ -124,7 +125,7 @@ MovieBarcodes.ResultsView = (function() {
 		$("#detailInformationContainer").empty().append($el); 
 	}, 
 
-	addDetailInformationItem = function(id, title, movieBarcode, year, genre, director, country, language, runtime, cast, summary, domCol1Value, domCol1Percentage, domCol1Name, domCol2Value, domCol2Percentage, domCol2Name, domCol3Value, domCol3Percentage, domCol3Name) {
+	addDetailInformationItem = function(id, title, movieBarcode, year, genre, director, country, language, runtime, cast, summary, mostFrequentWords, domCol1Value, domCol1Percentage, domCol1Name, domCol2Value, domCol2Percentage, domCol2Name, domCol3Value, domCol3Percentage, domCol3Name) {
 		makeDetailInformationItem({
 			id: id, 
 			title: title,
@@ -137,6 +138,7 @@ MovieBarcodes.ResultsView = (function() {
 			runtime: runtime,
 			cast: cast,
 			summary: summary, 
+			mostFrequentWords: mostFrequentWords,
 			domCol1Value: domCol1Value,
 		    domCol1Percentage: domCol1Percentage,
 		    domCol1Name: domCol1Name,
@@ -152,6 +154,7 @@ MovieBarcodes.ResultsView = (function() {
 
 	showMovieDetails = function(movieDetails) {
 		var id = "detailInformation";
+		var mostFrequentWords = "<p>Liebe (10)</p><p>Freude (4)</p>"; 
 		var dominantColors = movieDetails.dominantColors;
 
 		var domCol1 = dominantColors['1'];
@@ -170,7 +173,7 @@ MovieBarcodes.ResultsView = (function() {
 		var domCol3Percentage = domCol3['percent'];
 		var domCol3Name = domCol3['clusteredcolor'];
 
-		addDetailInformationItem(id, movieDetails.title, movieDetails.image, movieDetails.year, movieDetails.genre, movieDetails.director, movieDetails.country, movieDetails.language, movieDetails.runtime, movieDetails.actors, movieDetails.summary, domCol1Value, domCol1Percentage, domCol1Name, domCol2Value, domCol2Percentage, domCol2Name, domCol3Value, domCol3Percentage, domCol3Name)
+		addDetailInformationItem(id, movieDetails.title, movieDetails.image, movieDetails.year, movieDetails.genre, movieDetails.director, movieDetails.country, movieDetails.language, movieDetails.runtime, movieDetails.actors, movieDetails.summary, mostFrequentWords, domCol1Value, domCol1Percentage, domCol1Name, domCol2Value, domCol2Percentage, domCol2Name, domCol3Value, domCol3Percentage, domCol3Name)
 	}, 
 
 	makeResultList = function(options) {

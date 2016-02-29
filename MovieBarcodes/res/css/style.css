@@ -99,6 +99,11 @@ table {
 	display: inline-block;
 }
 
+.colorFilter .closeButton {
+	float: left;
+	margin-top: 2px;
+}
+
 #detailInformationTitle {
 	font-weight: bold
 }
@@ -165,13 +170,17 @@ table {
 	margin-bottom: 5px; 
 }
 
-.colorSelectItem, .resultColorItem, .dominantColorItem {
+.colorSelectItem, .resultColorItem, .dominantColorItem, .colorFilterColor {
 	width: 26px; 
 	height: 26px;
 	float: left;
 	border-radius: 2px; 
 	margin-right: 5px; 
 	border: 1px solid #ccc;
+}
+
+.colorFilterColor {
+	margin-left: 5px;
 }
 
 .dominantColorItem {

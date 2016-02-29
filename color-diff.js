@@ -26,4 +26,3 @@ for (var i = 0; i < palette.length; i++) {
 		console.log(colorName);
 	}
 }
-//console.log(closest);

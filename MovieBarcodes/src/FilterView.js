@@ -38,6 +38,7 @@ MovieBarcodes.FilterView = (function() {
 		$("#sortDirectionToggle").on('click', onSortDirecionToggleClick); 
 		$("#resetFiltersButton").on('click', onResetFilterButtonClick); 
 		$("#showResultListButton").on('click', onShowResultListButtonClick); 
+		$("#showResultModuleButton").on('click', onShowResultModuleButtonClick); 
 
 		return that; 
 	}, 
@@ -46,9 +47,16 @@ MovieBarcodes.FilterView = (function() {
 		$(that).trigger('showResultList');
 	}, 
 
+	onShowResultModuleButtonClick = function(event) {
+		adaptResults(); 
+	},
+
 	onSelectColor = function(event) {
-		parameters.push({key: "dominantColors.1.clusteredcolor", value: 'black'}); 
+		var color = "" + $(event.currentTarget).attr("data-id");
+		console.log(color); 
+		parameters.push({key: "dominantColors.1.clusteredcolor", value: color}); 
 		var parameter = {parameters: parameters, sort: sort}; 
+		addColorFilterItem("color", color); 
     	$(that).trigger('loadNewResults', [parameter]); 
 	},
 
@@ -147,7 +155,12 @@ MovieBarcodes.FilterView = (function() {
 	onRemoveFilterItemClick = function(event) {
 		var $filter = $(event.currentTarget).closest(".filter"); 
 		var filterType = $filter.find(".filterType").text();
-		filterType = (filterType == "genre") ? "storyline.genre" : filterType; 
+		if(filterType == "genre") {
+			filterType = "storyline.genre";
+		} if(filterType == "color") {
+			filterType = "dominantColors.1.clusteredcolor";
+		} 
+		//filterType = (filterType == "genre") ? "storyline.genre" : filterType; 
 		$filter.remove();
 		removeFilter(filterType); 
 		adaptResults(); 
@@ -168,6 +181,27 @@ MovieBarcodes.FilterView = (function() {
 			id: filterItemNr, 
 			filterType: filterType,
 			filterName: filterName
+		});
+		var $filterItem = $("#" + filterItemNr); 
+		$filterItem.on('click', ".closeButton", onRemoveFilterItemClick);
+		filterItemNr++;
+	}, 
+
+	makeColorFilterItem = function(options) {
+		var item = MovieBarcodes.ColorFilterItem().init({
+			id: options.id,
+			filterType: options.filterType, 
+			color: options.color
+		}); 
+		var $el = item.render(); 
+		$("#selectedFilters").append($el); 
+	}, 
+
+	addColorFilterItem = function(filterType, color) {
+		makeColorFilterItem({
+			id: filterItemNr, 
+			filterType: filterType, 
+			color: color
 		});
 		var $filterItem = $("#" + filterItemNr); 
 		$filterItem.on('click', ".closeButton", onRemoveFilterItemClick);

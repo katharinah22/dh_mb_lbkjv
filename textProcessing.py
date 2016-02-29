@@ -5,6 +5,7 @@ from nltk.corpus import wordnet as wn
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 from nltk.tokenize import RegexpTokenizer
+from collections import Counter
 
 
 def is_noun(tag):
@@ -31,9 +32,12 @@ def penn_to_wn(tag):
         return wn.VERB
     return wn.NOUN
 
-def removeStopWords(text):
-    
+def removeStopWords(text): 
     print([i for i in text.split() if i not in stop])
+
+def listToString(list):
+    strings = [pair[0] + ": " + str(pair[1]) for pair in list]
+    return(', '.join(strings))
 
 def lemmatize(text):
     #use english stopword list
@@ -47,7 +51,13 @@ def lemmatize(text):
     pos = nltk.pos_tag(list_of_words)
     #get lemma for each pos tagged word
     lemmata = [nltk.stem.WordNetLemmatizer().lemmatize(item[0],pos=penn_to_wn(item[1])) for item in pos]
-    lemmaString = ', '.join(lemmata)
-    return lemmaString
+    counter = Counter(lemmata)
+    #lemmasWithWordCounts = counter.most_common(len(counter))
+    lemmasWithWordCounts = counter.most_common(20)
+    lemmasWithWordCountsString = listToString(lemmasWithWordCounts)
+    allLemmasAndMostFrequentLemmas = [lemmata, lemmasWithWordCountsString]
+    #print(allLemmasAndMostFrequentLemmas[0])
+    print(allLemmasAndMostFrequentLemmas[1])
+    return allLemmasAndMostFrequentLemmas
 
-#lemmatize("Now he goes to the university of Regensburg.")
+#lemmatize("Now he goes to the university of Regensburg. The university of Regensburg is one of the most beautiful universities in Germany!")

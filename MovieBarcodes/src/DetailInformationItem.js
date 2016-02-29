@@ -11,6 +11,7 @@ MovieBarcodes.DetailInformationItem = function() {
 	runtime = null,
 	cast = null,
 	summary = null,
+	mostFrequentWords = null, 
 	domCol1Value = null, 
     domCol1Percentage = null, 
     domCol1Name = null,
@@ -34,6 +35,7 @@ MovieBarcodes.DetailInformationItem = function() {
 		runtime = options.runtime;
 		cast = options.cast;
 		summary = options.summary;
+		mostFrequentWords = options.mostFrequentWords;
 		domCol1Value = options.domCol1Value; 
 	    domCol1Percentage = options.domCol1Percentage;
 	    domCol1Name = options.domCol1Name;
@@ -62,6 +64,7 @@ MovieBarcodes.DetailInformationItem = function() {
 			runtime: runtime,
 			cast: cast,
 			summary: summary, 
+			mostFrequentWords: mostFrequentWords, 
 			domCol1Value: domCol1Value, 
 		    domCol1Percentage: domCol1Percentage,
 		    domCol1Name: domCol1Name,

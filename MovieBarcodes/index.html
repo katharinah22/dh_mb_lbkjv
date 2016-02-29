@@ -29,18 +29,17 @@
 
                     <div class="title">colors: </div>
                     <div id="colorSelector" class="clear">
-                        <div class="colorSelectItem" id="colorSelectItem1"></div>
-                        <div class="colorSelectItem" id="colorSelectItem2"></div>
-                        <div class="colorSelectItem" id="colorSelectItem3"></div>
-                        <div class="colorSelectItem" id="colorSelectItem4"></div>
-                        <div class="colorSelectItem" id="colorSelectItem5"></div>
-                        <div class="colorSelectItem" id="colorSelectItem6"></div>
-                        <div class="colorSelectItem" id="colorSelectItem7"></div>
-                        <div class="colorSelectItem" id="colorSelectItem8"></div>
-                        <div class="colorSelectItem" id="colorSelectItem9"></div>
-                        <div class="colorSelectItem" id="colorSelectItem10"></div>
-                        <div class="colorSelectItem" id="colorSelectItem11"></div>
-                        <div class="colorSelectItem" id="colorSelectItem12"></div>
+                        <div class="colorSelectItem" id="colorSelectItem1" data-id="red"></div>
+                        <div class="colorSelectItem" id="colorSelectItem2" data-id="orange"></div>
+                        <div class="colorSelectItem" id="colorSelectItem3" data-id="yellow"></div>
+                        <div class="colorSelectItem" id="colorSelectItem4" data-id="green"></div>
+                        <div class="colorSelectItem" id="colorSelectItem5" data-id="cyan"></div>
+                        <div class="colorSelectItem" id="colorSelectItem6" data-id="blue"></div>
+                        <div class="colorSelectItem" id="colorSelectItem7" data-id="magenta"></div>
+                        <div class="colorSelectItem" id="colorSelectItem9" data-id="white"></div>
+                        <div class="colorSelectItem" id="colorSelectItem10" data-id="grey"></div>
+                        <div class="colorSelectItem" id="colorSelectItem11" data-id="black"></div>
+                        <div class="colorSelectItem" id="colorSelectItem12" data-id="brown"></div>
                     </div>
                     <div class="title">director: </div>
                     <input type="text" class="form-control" id="directorInput">
@@ -181,6 +180,9 @@
                         
             <div class="title">plot summary: </div>
             <div id="detailInformationSummary"><%= summary %></div>
+
+            <div class="title">Top 10 most frequent words: </div>
+            <div id="mostFrequentWords"><%= mostFrequentWords %></div>
         </div>
   
     </script>
@@ -234,7 +236,18 @@
         <div class="filter <%= filterType %>Filter" id="<%= id %>">
             <button class="btn btn-default button closeButton">
                 <span class="zmdi zmdi-close zmdi-hc-lg"></span>
-            </button> <span class="filterType"><%= filterType %></span>: <span class="filterName"><%= filterName %></span>
+            </button> 
+            <span class="filterType"><%= filterType %></span>: <span class="filterName"><%= filterName %></span>
+        </div>
+    </script>
+
+    <script type="text/html" id="colorFilterItem-tpl"> 
+        <div class="filter <%= filterType %>Filter" id="<%= id %>">
+            <button class="btn btn-default button closeButton">
+                <span class="zmdi zmdi-close zmdi-hc-lg"></span>
+            </button> 
+            <div class="colorFilterColor" style="background-color: <%= color %>;"></div>
+            <br class="clear" />
         </div>
     </script>
 
@@ -254,6 +267,7 @@
     <script src="src/ResultItem.js"></script>
     <script src="src/DetailInformationItem.js"></script>
     <script src="src/FilterItem.js"></script>
+    <script src="src/ColorFilterItem.js"></script>
     <script src="src/ResultList.js"></script>
     <script src="src/ResultListItem.js"></script>
 
