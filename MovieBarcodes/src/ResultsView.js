@@ -25,7 +25,47 @@ MovieBarcodes.ResultsView = (function() {
 			}
 			addResultItem(id, title, year, genre, image, firstColor, secondColor, thirdColor); 
 		}
+		initAlphabeticSections();
 	}, 
+
+	initAlphabeticSections = function(){
+		var letters = alphabeticalOverview.countLetters(".resultTitle", true);
+		createButtons(letters);
+		createSections();
+		alphabeticalOverview.addListenerToAlphabet(".alphabetButton.enabled");
+	},
+
+	createSections = function() {
+		var buchstabe = "";
+		$(".resultItem").each(function(){
+		    var l = $(this).find(".resultTitle").text()[0].toUpperCase();
+		    if(l<65 || l>90 || l=="(") {
+		    	l="#";
+		    }
+		    if(l != buchstabe){
+		        buchstabe = l;
+		        $(this).before("<div class='sections' name='alphabeticalOverview_"+ l +"'>" + l + "</div>  <button class='btn btn-default backToTop'>Back to Top</button>");
+		    }
+		});
+		$(".backToTop").on('click', onJumpToTopClick);
+		$(".backToTop")[0].remove();
+	},
+
+	createButtons = function(letters){
+		$(".alphabetButton").remove();
+		for(var l in letters){
+			var btn = $("<button class='btn btn-default alphabetButton'>"+l+"</button>");
+			if(letters[l]>0)btn.addClass("enabled");
+			else btn.prop("disabled",true);
+			$(".letters").append(btn);
+		}
+	},
+
+	onJumpToTopClick = function(event) {
+		$('html, body').animate({ scrollTop: 0 });
+	},
+
+
 
 	loadResultListItems = function(movies) {
 		console.log(movies); 

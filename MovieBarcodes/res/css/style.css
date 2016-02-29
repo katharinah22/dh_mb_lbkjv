@@ -81,6 +81,32 @@ body {
 	cursor: pointer;
 }
 
+.sections:first-child {
+	margin-top: 1%;
+}
+
+.sections {
+	background-color: #333; /*#9C004B; */
+	color: white;
+	padding: 4px 200px;
+	border-radius: 2px; 
+	margin-top: 7%;
+	margin-bottom: 1%;
+	display: block;
+	font-size: 1.4em;
+	max-width: 20%;
+	white-space: nowrap;
+	margin-left: 2%;
+}
+
+.backToTop{
+	float: right;
+	margin-right: 12%;
+	margin-top: -5.7%;
+	display: block;
+}
+
+
 table {
 	margin: 0px !important;
 }
@@ -134,8 +160,8 @@ table {
 .resultItem {
 	width: 190px; 
 	height: 210px; 
-	float: left; 
 	margin: 40px 20px;
+	display: inline-block;
 	cursor: pointer;
 }
 
