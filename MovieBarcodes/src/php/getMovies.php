@@ -31,7 +31,6 @@
             getAllMovies($parameters, $sort, $init);
             break; 
         case 'getMoviesForListView':
-            ChromePhp::log("hi");
             getMoviesForListView(); 
             break;
         default: 
@@ -42,20 +41,37 @@
         global $myCollection, $gridFS; 
         $p = array(); 
         if($parameters == "") {
-            //->sort(array("title" => -1)); 
             $results = $myCollection->find();
         } else {
+            $and = array(); 
             for($i = 0; $i < count($parameters); $i++) {
+                $oneParameter = array(); 
                 $parameter = $parameters[$i]; 
                 $key = $parameter['key']; 
+                if ($key == "subtitles") {
+                    $key = "subtitlesLemmatisation";
+                }
                 $value = $parameter['value']; 
                 if(isset($value['gte']) && isset($value['lte'])) {
                     $value = array('$gte' => (int) $value['gte'], '$lte' => (int) $value['lte']);
-                } else if($value[0] == "/") {
+                } else if($key == "color") {
+                    $or = array(); 
+                    for ($j = 1; $j <= 3; $j++) {
+                        $or[] = array("dominantColors." . $j . ".clusteredcolor" => $value['name'], "dominantColors." . $j . ".percent" => 
+                                    array('$gte' => (int) $value['gte']));
+                    }
+                    $oneParameter = array('$or' => $or); 
+                } else if ($value[0] == "/") {
                     $value = new MongoRegex($value);
+                } 
+                if($key != "color") {
+                    $oneParameter[$key] = $value; 
                 }
-                $p[$key] = $value; 
+                $and[] = $oneParameter; 
+                //$p[$key] = $value; 
             }
+            $p['$and'] = $and;
+            ChromePhp::log($p); 
             $results = $myCollection->find($p);          
         }
 
@@ -152,11 +168,15 @@
         $director = $movie['director'];
         $runtime = $storyline['runtime'];
         $summary = $storyline['summary'];
-
-
+        if(isset($movie['subtitlesMostFrequentWords'])) {
+            $subtitlesMostFrequentWords = $movie['subtitlesMostFrequentWords'];
+        } else {
+            $subtitlesMostFrequentWords = "";
+        }
+        
         $moviebarcodeData =  base64_encode($gridFS->findOne(array("_id" => $id))->getBytes());
         $image = "data:image/jpeg;base64, $moviebarcodeData";
-        $movieData = array("title"=>$title, "image"=>$image, "actors"=>$actors, "country"=>$country, "director"=>$director, "genre"=>$genre, "language"=>$language, "year"=>$year, "runtime"=>$runtime, "summary"=>$summary, "dominantColors"=>$dominantColors); 
+        $movieData = array("title"=>$title, "image"=>$image, "actors"=>$actors, "country"=>$country, "director"=>$director, "genre"=>$genre, "language"=>$language, "year"=>$year, "runtime"=>$runtime, "summary"=>$summary, "dominantColors"=>$dominantColors, "subtitlesMostFrequentWords"=>$subtitlesMostFrequentWords); 
         echo json_encode($movieData);
     }
 ?>

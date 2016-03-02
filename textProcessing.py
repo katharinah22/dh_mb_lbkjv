@@ -1,5 +1,3 @@
-__author__ = 'laura edel'
-
 import nltk
 from nltk.corpus import wordnet as wn
 from nltk.stem import WordNetLemmatizer
@@ -36,7 +34,7 @@ def removeStopWords(text):
     print([i for i in text.split() if i not in stop])
 
 def listToString(list):
-    strings = [pair[0] + ": " + str(pair[1]) for pair in list]
+    strings = [(pair[0] + " (" + str(pair[1]) + ")") for pair in list]
     return(', '.join(strings))
 
 def lemmatize(text):
@@ -55,9 +53,5 @@ def lemmatize(text):
     #lemmasWithWordCounts = counter.most_common(len(counter))
     lemmasWithWordCounts = counter.most_common(20)
     lemmasWithWordCountsString = listToString(lemmasWithWordCounts)
-    allLemmasAndMostFrequentLemmas = [lemmata, lemmasWithWordCountsString]
-    #print(allLemmasAndMostFrequentLemmas[0])
-    print(allLemmasAndMostFrequentLemmas[1])
+    allLemmasAndMostFrequentLemmas = [' '.join(lemmata), lemmasWithWordCountsString]
     return allLemmasAndMostFrequentLemmas
-
-#lemmatize("Now he goes to the university of Regensburg. The university of Regensburg is one of the most beautiful universities in Germany!")

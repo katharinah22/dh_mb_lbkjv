@@ -153,8 +153,12 @@ table {
 }
 
 #search {
-	width: 200px;
+	width: 250px;
     float: left;
+}
+
+.colorFilter .filterType {
+	display: none;
 }
 
 .resultItem {
@@ -187,6 +191,17 @@ table {
 	color: #333;
 }
 
+.colorPercentageSlider {
+	width: 120px; 
+	float: right;
+	margin-top: 7px;
+}
+
+.colorPercentageValue {
+	float: right;
+    margin-right: 45px;
+}
+   
 .detailDescription {
 	font-weight: bold;
 	width: 80px;  
@@ -205,8 +220,16 @@ table {
 	border: 1px solid #ccc;
 }
 
+.colorFilter {
+	padding: 0px !important;
+}
+
 .colorFilterColor {
 	margin-left: 5px;
+}
+
+#colorFilter .filterType {
+	display: none;
 }
 
 .dominantColorItem {
@@ -370,7 +393,7 @@ table {
 }
 
 #colorSelectItem5 {
-	background-color: deepskyblue; 
+	background-color: cyan; 
 }
 
 #colorSelectItem6 {
@@ -378,7 +401,7 @@ table {
 }
 
 #colorSelectItem7 {
-	background-color: darkviolet;
+	background-color: magenta;
 }
 
 #colorSelectItem8 {

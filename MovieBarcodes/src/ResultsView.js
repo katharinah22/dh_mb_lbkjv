@@ -25,7 +25,7 @@ MovieBarcodes.ResultsView = (function() {
 			}
 			addResultItem(id, title, year, genre, image, firstColor, secondColor, thirdColor); 
 		}
-		initAlphabeticSections();
+		//initAlphabeticSections();
 	}, 
 
 	initAlphabeticSections = function(){
@@ -194,7 +194,7 @@ MovieBarcodes.ResultsView = (function() {
 
 	showMovieDetails = function(movieDetails) {
 		var id = "detailInformation";
-		var mostFrequentWords = "<p>Liebe (10)</p><p>Freude (4)</p>"; 
+		var mostFrequentWords = movieDetails.subtitlesMostFrequentWords;
 		var dominantColors = movieDetails.dominantColors;
 
 		var domCol1 = dominantColors['1'];

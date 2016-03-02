@@ -55,12 +55,12 @@
                     <input type="text" class="form-control" id="actorInput">
                     
                 </div>
-                <div id="resultView" class="col-sm-6 col-md-7 col-lg-8">
+                <div id="resultView" class="col-sm-6 col-md-7 col-lg-9">
                     <div id="toolbar">
                         <div class="input-group" id="search">
-                            <input type="text" class="form-control" placeholder="">
+                            <input type="text" class="form-control" id="subtitleInput" placeholder="search in subtitles...">
                             <span class="input-group-btn">
-                                <button class="btn btn-default" type="button">Search</button>
+                                <button class="btn btn-default" id="searchForWordOccurrenceButton" type="button"><span class="zmdi zmdi-search zmdi-hc-lg"></span></button>
                             </span>
                         </div>
 
@@ -76,7 +76,7 @@
                         <button class="btn btn-default button layoutButton" id="showResultListButton"><span class="zmdi zmdi-view-list zmdi-hc-2x"></span></button>
                         <button class="btn btn-default button layoutButton" id="showResultModuleButton"><span class="zmdi zmdi-view-module zmdi-hc-2x"></span></button>
                     </div>
-                    <div class="container alphabeticButtonGroup">
+                    <div class="alphabeticButtonGroup">
                       <div class="btn-toolbar">
                         <div class="btn-group btn-group-sm letters">
                         </div>
@@ -135,19 +135,19 @@
                     <tr>
                         <td><div class="dominantColorItem" style="background-color: <%= domCol1Value %>;"></div></td>
                         <td><%= domCol1Value %></td>
-                        <td><%= domCol1Percentage %></td>
+                        <td><%= domCol1Percentage %>%</td>
                         <td><%= domCol1Name %></td>
                     </tr>
                     <tr>
                         <td><div class="dominantColorItem" style="background-color: <%= domCol2Value %>;"></div></td>
                         <td><%= domCol2Value %></td>
-                        <td><%= domCol2Percentage %></td>
+                        <td><%= domCol2Percentage %>%</td>
                         <td><%= domCol2Name %></td>
                     </tr>
                     <tr>
                         <td><div class="dominantColorItem" style="background-color: <%= domCol3Value %>;"></div></td>
                         <td><%= domCol3Value %></td>
-                        <td><%= domCol3Percentage %></td>
+                        <td><%= domCol3Percentage %>%</td>
                         <td><%= domCol3Name %></td>
                     </tr>
                 </tbody>
@@ -187,7 +187,7 @@
             <div class="title">plot summary: </div>
             <div id="detailInformationSummary"><%= summary %></div>
 
-            <div class="title">Top 10 most frequent words: </div>
+            <div class="title">Top 20 most frequent words: </div>
             <div id="mostFrequentWords"><%= mostFrequentWords %></div>
         </div>
   
@@ -217,17 +217,17 @@
                 <div class="dominantColors">
                     <div class="dominantColorItem" style="background-color: <%= domCol1Value %>;"></div>
                     <div><%= domCol1Name %></div>
-                    <div><%= domCol1Percentage %></div>
+                    <div><%= domCol1Percentage %>%</div>
                 </div>
                 <div class="dominantColors">
                     <div class="dominantColorItem" style="background-color: <%= domCol2Value %>;"></div>
                     <div><%= domCol2Name %></div>
-                    <div><%= domCol2Percentage %></div>
+                    <div><%= domCol2Percentage %>%</div>
                 </div>
                 <div class="dominantColors">
                     <div class="dominantColorItem" style="background-color: <%= domCol3Value %>;"></div>
                     <div><%= domCol3Name %></div>
-                    <div><%= domCol3Percentage %></div>
+                    <div><%= domCol3Percentage %>%</div>
                 </div>
             </td>
             <td><%= title %></td>
@@ -253,7 +253,11 @@
                 <span class="zmdi zmdi-close zmdi-hc-lg"></span>
             </button> 
             <div class="colorFilterColor" style="background-color: <%= color %>;"></div>
+            <div class="colorPercentageSlider"></div>
             <br class="clear" />
+            <p class="colorPercentageValue">>50%</p>
+            <br class="clear" />
+            <span class="filterType"><%= filterType %></span>
         </div>
     </script>
 

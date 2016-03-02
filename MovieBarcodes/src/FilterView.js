@@ -32,6 +32,7 @@ MovieBarcodes.FilterView = (function() {
 		    }
 		});
 		$("#filterInputFields input").keyup(onSubmitFilter); 
+		$("#search input").keyup(onSubmitFilter); 
 		$("#genreSelect").on('change', onGenreSelectChange); 
 		$("#sortedBySelect").on('change', onSotrBySelectChange); 
 		$(".colorSelectItem").on('click', onSelectColor); 
@@ -39,8 +40,20 @@ MovieBarcodes.FilterView = (function() {
 		$("#resetFiltersButton").on('click', onResetFilterButtonClick); 
 		$("#showResultListButton").on('click', onShowResultListButtonClick); 
 		$("#showResultModuleButton").on('click', onShowResultModuleButtonClick); 
+		$("#searchForWordOccurrenceButton").on('click', onSearchForWordOccurrenceButtonClick); 
+
 
 		return that; 
+	}, 
+
+	onSearchForWordOccurrenceButtonClick = function(event) {
+		var searchTerm = $("#search input").val();
+		var key = "subtitles";
+		removeFilter(key); 
+		removeFilterItemByType(key); 
+		parameters.push({key: key, value: "/" + searchTerm + "/i"});
+		adaptResults();  
+    	addFilterItem(key, searchTerm); 
 	}, 
 
 	onShowResultListButtonClick = function(event) {
@@ -53,8 +66,8 @@ MovieBarcodes.FilterView = (function() {
 
 	onSelectColor = function(event) {
 		var color = "" + $(event.currentTarget).attr("data-id");
-		console.log(color); 
-		parameters.push({key: "dominantColors.1.clusteredcolor", value: color}); 
+		parameters.push({key: "color", value: {'name': color, 'gte': 50}}); 
+		console.log(parameters); 
 		var parameter = {parameters: parameters, sort: sort}; 
 		addColorFilterItem("color", color); 
     	$(that).trigger('loadNewResults', [parameter]); 
@@ -70,6 +83,8 @@ MovieBarcodes.FilterView = (function() {
 				key = "director"; 
 			} else if (id == "actorInput") {
 				key = "actors"; 
+			} else if (id == "subtitleInput") {
+				key = "subtitles";
 			}
 			var value = event.currentTarget.value; 
 			removeFilter(key); 
@@ -140,7 +155,6 @@ MovieBarcodes.FilterView = (function() {
 			sortDirection = "1"; 
 		}
 		sort["sortDirection"] = sortDirection; 
-		//sort = {value: "title", sortDirection: sortDirection}; 
 		adaptResults(); 
 	}, 
 
@@ -152,17 +166,27 @@ MovieBarcodes.FilterView = (function() {
 		}
 	}, 
 
+	removeColorFilter = function(filterType, color) {
+		for (var i = 0; i < parameters.length; i++) {
+			if (parameters[i]["key"] == filterType && parameters[i]["value"]["name"] == color) {
+				parameters.splice(i, 1); 
+			}
+		}
+	}, 
+
 	onRemoveFilterItemClick = function(event) {
 		var $filter = $(event.currentTarget).closest(".filter"); 
 		var filterType = $filter.find(".filterType").text();
 		if(filterType == "genre") {
 			filterType = "storyline.genre";
-		} if(filterType == "color") {
-			filterType = "dominantColors.1.clusteredcolor";
 		} 
-		//filterType = (filterType == "genre") ? "storyline.genre" : filterType; 
 		$filter.remove();
-		removeFilter(filterType); 
+		if(filterType == "color") {
+			var color = $filter.find(".colorFilterColor").css("background-color");
+			removeColorFilter(filterType, color); 
+		} else {
+			removeFilter(filterType); 
+		}
 		adaptResults(); 
 	}, 
 
@@ -205,6 +229,26 @@ MovieBarcodes.FilterView = (function() {
 		});
 		var $filterItem = $("#" + filterItemNr); 
 		$filterItem.on('click', ".closeButton", onRemoveFilterItemClick);
+		$filterItem.find(".colorPercentageSlider").slider({
+		    range: false,
+		    min: 0,
+		    max: 100,
+		    step: 1,
+		    value: 50,
+		    slide: function (e, ui) {
+		        $filterItem.find(".colorPercentageValue").html(">" + ui.value + "%");
+		    }, 
+		    change: function (e, ui) {
+		    	for (var i = 0; i < parameters.length; i++) {
+		    		var parameter = parameters[i];
+		    		if(parameter['key'] == "color" && parameter['value']['name'] == color) {
+		    			parameter['value']['gte'] = ui.value;
+		    		}
+		    	}
+		    	var parameter = {parameters: parameters, sort: sort}; 
+		    	$(that).trigger('loadNewResults', [parameter]); 
+		    }
+		});
 		filterItemNr++;
 	}; 
 

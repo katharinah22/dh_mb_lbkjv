@@ -222,8 +222,6 @@ def process_file(file):
             #                l_director, l_writer, l_genre, l_language, l_released, l_runtime, l_plot,
             #                l_imdb_rating, l_awards, l_metascore, l_imdb_votes, l_type, l_rated, l_poster)
 #            '''
-            # get dominant colors of each moviebarcode-image
-            # get_dominant_color_by_colorthief(db, fs, l_post_id)   # unused
             #get_dominant_colors_by_colordiff(db, fs, l_post_id) 
             get_subtitles(db, l_post_id, l_imdbid)
             print('\n')
@@ -235,7 +233,6 @@ def urlEncodeNonAscii(b):
 
 def get_movie_json(title):
     urlTitle = urllib.parse.quote_plus(title.replace('The Complete ', ''))
-    # print("http://www.omdbapi.com/?t=" + urlTitle)
     response = urlopen("http://www.omdbapi.com/?t=" + urlTitle).read().decode('utf8')
     obj = json.loads(response)
     return obj
@@ -367,7 +364,8 @@ def fill_collection(db, fs, l_post_id, l_imdbid, l_title, l_year, l_image, l_act
                                 "awards": l_awards,
                                 "metascore": l_metascore,
                                 "rated": l_rated
-                            }
+                            }, 
+                        "subtitlesLemmatisation": ""
                     }
                 )
     except Exception as e:
@@ -412,7 +410,6 @@ def get_dominant_colors_by_colordiff(db, fs, l_post_id):
         color_R = int(color[0])
         color_G = int(color[1])
         color_B = int(color[2])
-        #real_color = "{ R: " + str(color_R) + ", G: " + str(color_G) + ", B: " + str(color_B) + " }"
         real_color = "rgb(" + str(color_R) + ", " + str(color_G) + ", " + str(color_B) + ")"
         print(real_color) 
         real_color_hex = rgb2hex(color_R, color_G, color_B)
@@ -429,124 +426,7 @@ def get_dominant_colors_by_colordiff(db, fs, l_post_id):
         count += 1
     print(dominant_colors)
     # return dominant_colors
-    #store_colors_by_colordiff_to_db(db, l_post_id, dominant_colors)
     update_value_in_db(db, l_post_id, "dominantColors", dominant_colors)
-
-#unused
-def store_colors_by_colordiff_to_db(db, l_post_id, dominant_colors):
-    print(dominant_colors)
-    if db.movie.find_one({"_id": l_post_id}):
-        debugKH("UPDATE" + l_post_id)
-        try:
-            db.movie.update(
-                {"_id": l_post_id},
-                {
-                    '$set': {
-                        "dominantColors": dominant_colors
-                    }
-                },
-                upsert=False
-            )
-        except Exception as e:
-            print(e)
-    elif db.serie.find_one({"_id": l_post_id}):
-        debugKH("UPDATE" + l_post_id)
-        try:
-            db.serie.update(
-                {"_id": l_post_id},
-                {
-                    '$set': {
-                        "dominantColors": dominant_colors
-                    }
-                },
-                upsert=False
-            )
-        except Exception as e:
-            print(e)
-    else:
-        print("no entry for ", l_post_id)
-
-
-# unused
-def get_dominant_color_by_colorthief(db, fs, l_post_id):
-    img_barcode = fs.get(l_post_id).read()
-    my_img = open("myMovieBarcode.jpg", "wb")
-    my_img.write(img_barcode)
-    my_img.close()
-
-    cot = ct.ColorThief("myMovieBarcode.jpg")
-
-    # get dominat color
-    dominat_color = cot.get_color(quality=1)
-    dominat_color = webcolors.rgb_to_hex(dominat_color) # rgb to hex
-    # palette of colors
-    arr_domcol = cot.get_palette(color_count=10)
-
-    debugKH("DominantColor 1: " + dominat_color)
-
-    i = 0
-    arr_domcol_hex = []
-    for i in range(0, len(arr_domcol)):
-        arr_domcol_hex.append(webcolors.rgb_to_hex(arr_domcol[i]))
-        print("PaletteColor: ", i+2, " ", webcolors.rgb_to_hex(arr_domcol[i]))
-        i += 1
-    debugKH(arr_domcol_hex)
-    store_domcol_to_db(db, l_post_id, dominat_color, arr_domcol_hex)
-
-#unused
-def store_domcol_to_db(db, l_post_id, dominat_color, arr_domcol_hex):
-    if db.movie.find_one({"_id": l_post_id}):
-        debugKH("UPDATE" + l_post_id)
-        try:
-            db.movie.update(
-                {"_id": l_post_id},
-                {
-                    '$set': {"dominantColors":
-                                {
-                                    "1st": dominat_color,
-                                    "2nd": arr_domcol_hex[0],
-                                    "3rd": arr_domcol_hex[1],
-                                    "4th": arr_domcol_hex[2],
-                                    "5th": arr_domcol_hex[3],
-                                    "6th": arr_domcol_hex[4],
-                                    "7th": arr_domcol_hex[5],
-                                    "8th": arr_domcol_hex[6],
-                                    "9th": arr_domcol_hex[7],
-                                    "10th": arr_domcol_hex[8]
-                                }
-                    }
-                },
-                upsert=False
-            )
-        except Exception as e:
-            print(e)
-    elif db.serie.find_one({"_id": l_post_id}):
-        debugKH("UPDATE" + l_post_id)
-        try:
-            db.serie.update(
-                {"_id": l_post_id},
-                {
-                    '$set': {"dominantColors":
-                                {
-                                    "1st": dominat_color,
-                                    "2nd": arr_domcol_hex[0],
-                                    "3rd": arr_domcol_hex[1],
-                                    "4th": arr_domcol_hex[2],
-                                    "5th": arr_domcol_hex[3],
-                                    "6th": arr_domcol_hex[4],
-                                    "7th": arr_domcol_hex[5],
-                                    "8th": arr_domcol_hex[6],
-                                    "9th": arr_domcol_hex[7],
-                                    "10th": arr_domcol_hex[8]
-                                }
-                    }
-                },
-                upsert=False
-            )
-        except Exception as e:
-            print(e)
-    else:
-        print("no entry for ", l_post_id)
 
 
 def get_subtitles(db, l_post_id, l_imdbid):
@@ -571,13 +451,9 @@ def get_subtitles(db, l_post_id, l_imdbid):
             # subtitle in byte format
             decoded_subtitle = gzip.GzipFile(fileobj=io.BytesIO(decoded_subtitle)).read()
             clean_subtitle = remove_invalid_characters(decoded_subtitle)
-            print(clean_subtitle)
-            #store_subtitles_to_db(db, l_post_id, clean_subtitle)
             allLemmasAndMostFrequentLemmas = lemmatize(clean_subtitle)
             print(allLemmasAndMostFrequentLemmas[0])
             print(allLemmasAndMostFrequentLemmas[1])
-            #store_subtitles_to_db(db, l_post_id, allLemmasAndMostFrequentLemmas[0])
-            #store_mostFrequentLemmas_to_db(db, l_post_id, allLemmasAndMostFrequentLemmas[1])
             update_value_in_db(db, l_post_id, "subtitlesLemmatisation", allLemmasAndMostFrequentLemmas[0])
             update_value_in_db(db, l_post_id, "subtitlesMostFrequentWords", allLemmasAndMostFrequentLemmas[1])
     except ValueError:
@@ -623,65 +499,6 @@ def update_value_in_db(db, l_post_id, key, value):
         else:
             print("no entry for ", l_post_id)
 
-#unused
-def store_subtitles_to_db(db, l_post_id, subtitle):
-        print("Subtitle", subtitle)
-        if db.movie.find_one({"_id": l_post_id}):
-            debugKH("UPDATE" + l_post_id)
-            try:
-                db.movie.update(
-                    {"_id": l_post_id},
-                    {
-                        '$set': {"subtitle": subtitle}
-                    },
-                    upsert=False
-                )
-            except Exception as e:
-                print(e)
-        elif db.serie.find_one({"_id": l_post_id}):
-            debugKH("UPDATE" + l_post_id)
-            try:
-                db.serie.update(
-                    {"_id": l_post_id},
-                    {
-                        '$set': {"subtitle": subtitle}
-                    },
-                    upsert=False
-                )
-            except Exception as e:
-                print(e)
-        else:
-            print("no entry for ", l_post_id)
-
-def store_mostFrequentLemmas_to_db(db, l_post_id, mostFrequentLemmas):
-        print("mostFrequentLemmas", mostFrequentLemmas)
-        if db.movie.find_one({"_id": l_post_id}):
-            debugKH("UPDATE" + l_post_id)
-            try:
-                db.movie.update(
-                    {"_id": l_post_id},
-                    {
-                        '$set': {"mostFrequentLemmas": mostFrequentLemmas}
-                    },
-                    upsert=False
-                )
-            except Exception as e:
-                print(e)
-        elif db.serie.find_one({"_id": l_post_id}):
-            debugKH("UPDATE" + l_post_id)
-            try:
-                db.serie.update(
-                    {"_id": l_post_id},
-                    {
-                        '$set': {"mostFrequentLemmas": mostFrequentLemmas}
-                    },
-                    upsert=False
-                )
-            except Exception as e:
-                print(e)
-        else:
-            print("no entry for ", l_post_id)
-
 # removes numbers, special characters, control characters and tags
 def remove_invalid_characters(decoded_subtitle):
     # convert bytes to string
@@ -694,61 +511,6 @@ def remove_invalid_characters(decoded_subtitle):
     subtitles_string = re.sub("[^a-zA-Z\']+", " ", subtitles_string)
 
     return subtitles_string
-
-
-# unused
-def write_color_clusters_to_db(db):
-    l_cc = open("satfaces.txt")
-    f = l_cc.read()
-
-    p_linebreak = re.compile('\n')
-    pattern1 = re.compile('\[\d{1,3}, \d{1,3}, \d{1,3}\] .*')
-    p_rgb = re.compile('\d{1,3}, \d{1,3}, \d{1,3}')
-    p_name = re.compile('\) .*')
-
-    cc_parts = (re.split(p_linebreak, f))
-    for cc_line in cc_parts:
-        if re.search(pattern1, cc_line):
-            cc_line = re.sub('\[', '(', cc_line)
-            cc_line = re.sub('\]', ')', cc_line)
-            l_match_rgb = ((re.search(p_rgb, cc_line)).group(0))            # rgb for db
-            l_match_rgb = re.split(',', l_match_rgb)
-            l_match_red = int(l_match_rgb[0])
-            l_match_green = int(l_match_rgb[1])
-            l_match_blue = int(l_match_rgb[2])
-
-            l_tuple_rgb = l_match_red, l_match_green, l_match_blue
-            l_match_hex = webcolors.rgb_to_hex(l_tuple_rgb)                 # hex value for db
-
-            l_match_name = ((re.search(p_name, cc_line)).group(0))[2:]      # color name for db
-
-            if db.colorcluster.find_one({"_id": l_match_hex}):
-                debugKH("UPDATE" + l_match_hex)
-                try:
-                    db.serie.update(
-                        {"_id": l_match_hex},
-                            {
-                                '$set':
-                                    {
-                                        "rgbval": l_match_rgb,
-                                        "colorcluster": l_match_name
-                                    }
-                            },
-                            upsert=False
-                    )
-                except Exception as e:
-                    print(e)
-
-            else:
-                db.colorcluster.insert_one(
-                    {
-                        "_id": l_match_hex,
-                        "rgbval": l_match_rgb,
-                        "colorcluster": l_match_name
-                    }
-                )
-
-    l_cc.close()
 
 
 # commandline output katharina // ONLY TEST!

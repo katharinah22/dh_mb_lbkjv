@@ -47,7 +47,6 @@ MovieBarcodes.DetailInformationItem = function() {
 	    domCol3Name = options.domCol3Name;
 
 		template = $('#detailInformation-tpl').html();
-		console.log("hi"); 
 		return that; 
 	}, 
 
