@@ -25,7 +25,7 @@ MovieBarcodes.ResultsView = (function() {
 			}
 			addResultItem(id, title, year, genre, image, firstColor, secondColor, thirdColor); 
 		}
-		//initAlphabeticSections();
+		initAlphabeticSections();
 	}, 
 
 	initAlphabeticSections = function(){
@@ -48,7 +48,9 @@ MovieBarcodes.ResultsView = (function() {
 		    }
 		});
 		$(".backToTop").on('click', onJumpToTopClick);
-		$(".backToTop")[0].remove();
+		if ($(".backToTop").length) {
+			$(".backToTop")[0].remove();
+		}
 	},
 
 	createButtons = function(letters){
