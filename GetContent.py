@@ -218,11 +218,11 @@ def process_file(file):
                       l_imdb_votes, l_type, l_rated, l_poster)
 #            '''
             # fill mongodb
-            #fill_collection(db, fs, l_post_id, l_imdbid, l_title, l_year, l_image, l_actors, l_country,
-            #                l_director, l_writer, l_genre, l_language, l_released, l_runtime, l_plot,
-            #                l_imdb_rating, l_awards, l_metascore, l_imdb_votes, l_type, l_rated, l_poster)
+            fill_collection(db, fs, l_post_id, l_imdbid, l_title, l_year, l_image, l_actors, l_country,
+                            l_director, l_writer, l_genre, l_language, l_released, l_runtime, l_plot,
+                            l_imdb_rating, l_awards, l_metascore, l_imdb_votes, l_type, l_rated, l_poster)
 #            '''
-            #get_dominant_colors_by_colordiff(db, fs, l_post_id) 
+            get_dominant_colors_by_colordiff(db, fs, l_post_id) 
             get_subtitles(db, l_post_id, l_imdbid)
             print('\n')
 
