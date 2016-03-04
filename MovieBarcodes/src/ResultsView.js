@@ -6,8 +6,7 @@ MovieBarcodes.ResultsView = (function() {
 		return that; 
 	}, 
 
-	addResults = function(movies) {
-		console.log("ready"); 
+	addResults = function(movies, data) {
 		$("#results").empty(); 
 		for (var i = 0; i < movies.length; i++) {
 			var id = movies[i].id;
@@ -25,28 +24,47 @@ MovieBarcodes.ResultsView = (function() {
 			}
 			addResultItem(id, title, year, genre, image, firstColor, secondColor, thirdColor); 
 		}
-		initAlphabeticSections();
+		if(data && data.sort && data.sort.value)
+			initSections(data.sort.value);
+		else
+			initSections();
 	}, 
 
-	initAlphabeticSections = function(){
-		var letters = alphabeticalOverview.countLetters(".resultTitle", true);
+	initSections = function(sort){
+
+		var letters = [];
+
+		if(!sort)sort="title";
+		switch(sort){
+			case "year":
+				letters = alphabeticalOverview.countLetters(".resultYear", true, function(txt){
+					var year = txt.replace(/[ ()]/g, "");
+					if(year<=1850)return "<1850";
+					else if(year>1850&&year<=1900)return "1851-1900";
+					else {
+						var from = Math.floor(year/10)*10;
+						var to = ((Math.floor(year/10)+1)*10)-1;
+						return from+"-"+to;
+					}
+				});
+				break;
+			default:
+				letters = alphabeticalOverview.countLetters(".resultTitle", true);
+		}
+		createAlphabet(letters);
+		createSections(letters);
+	},
+
+	createAlphabet = function(letters){
 		createButtons(letters);
-		createSections();
 		alphabeticalOverview.addListenerToAlphabet(".alphabetButton.enabled");
 	},
 
-	createSections = function() {
-		var buchstabe = "";
-		$(".resultItem").each(function(){
-		    var l = $(this).find(".resultTitle").text()[0].toUpperCase();
-		    if(l<65 || l>90 || l=="(") {
-		    	l="#";
-		    }
-		    if(l != buchstabe){
-		        buchstabe = l;
-		        $(this).before("<div class='sections' name='alphabeticalOverview_"+ l +"'>" + l + "</div>  <button class='btn btn-default backToTop'>Back to Top</button>");
-		    }
-		});
+	createSections = function(letters) {
+		for(var l in letters){
+			var section = ("<div class='sections' name='alphabeticalOverview_"+ l +"'>" + l + "</div>  <button class='btn btn-default backToTop'>Back to Top</button>");	
+			$("div[name='alphabeticalOverview_"+l+"']").closest(".resultItem").before(section);
+		}
 		$(".backToTop").on('click', onJumpToTopClick);
 		if ($(".backToTop").length) {
 			$(".backToTop")[0].remove();
@@ -70,7 +88,7 @@ MovieBarcodes.ResultsView = (function() {
 
 
 	loadResultListItems = function(movies) {
-		console.log(movies); 
+		$(".alphabetButton").remove();
 		for (var i = 0; i < movies.length; i++) {
 			var id = movies[i].id;
 			var title = movies[i].title; 

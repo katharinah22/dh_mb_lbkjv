@@ -55,8 +55,8 @@ MovieBarcodes.MainController = (function() {
 		filterView.loadGenreSelect(genres); 	
 	}, 
 
-	onLoadResults = function(event, movies) {
-		resultsView.addResults(movies); 
+	onLoadResults = function(event, movies, data) {
+		resultsView.addResults(movies, data); 
 	}, 
 
 	onLoadResultListItems = function(event, movies) {

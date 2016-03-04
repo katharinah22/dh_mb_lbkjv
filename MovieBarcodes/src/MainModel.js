@@ -63,7 +63,6 @@ MovieBarcodes.MainModel = (function() {
 		startSpinner(); 
 		$.ajax({url: "src/php/getMovies.php?command=getMoviesForListView"}).done(function(data) {
 			var movies = jQuery.parseJSON(data);
-			console.log(movies); 
 			$(that).trigger('loadResultListItems', [movies]); 
 			stopSpinner();
 		});
@@ -71,7 +70,8 @@ MovieBarcodes.MainModel = (function() {
 
 	getAllMovies = function(data) {
 		startSpinner(); 
-		$.ajax({url: "src/php/getMovies.php?command=getAllMovies", data: data}).done(function(data) {
+		var url = "src/php/getMovies.php?command=getAllMovies";
+		$.ajax({url: url, data: data}).done(function(data) {
 			var object = jQuery.parseJSON(data);
 			var movies = object.movies; 
 			var genres = object.genres; 
@@ -82,10 +82,10 @@ MovieBarcodes.MainModel = (function() {
 
 	getMovies = function(data) {
 		startSpinner(); 
-		$.ajax({url: "src/php/getMovies.php?command=getMovies", data: data}).done(function(data) {
-			var movies = jQuery.parseJSON(data);
+		$.ajax({url: "src/php/getMovies.php?command=getMovies", data: data}).done(function(result) {
+			var movies = jQuery.parseJSON(result);
 			//var movies = object.movies; 
-			$(that).trigger('loadResults', [movies]); 
+			$(that).trigger('loadResults', [movies, data]); 
 			stopSpinner();
 		});
 	}, 
