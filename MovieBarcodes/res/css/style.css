@@ -1,3 +1,464 @@
+html {
+  	height: 100%; 
+  	background-color: #fafafa !important;
+}
+
+h1 {
+	/*text-align: center; */
+}
+
+body {
+  	margin: 0px;
+  	font-family: 'Helvetica Neue', Helvetica, Arial;
+  	color: #333;
+  	height: 100%;
+  	-webkit-user-select: none;
+  	-moz-user-select: none;
+  	-ms-user-select: none;
+  	user-select: none;
+  	-webkit-tap-highlight-color: rgba(0,0,0,0);
+ 	-webkit-touch-callout: none;
+  	background-color: #fafafa !important;
+}
+
 .title {
 	font-weight: bold; 
+}
+
+#selectedFilters {
+	position: relative;
+}
+
+#selectedFilters .closeButton {
+	padding: 0px 5px!important;
+	cursor: pointer;
+	border-radius: 22px;
+	outline:none;
+}
+
+.filterType{
+	font-weight: bold; 
+}
+
+.clear {
+	clear: both; 
+}
+
+.filter {
+	width: 100%;
+	padding-bottom: 10px;
+	border-radius: 2px; 
+}
+
+#filterInputFields {
+	width: 220px;
+	padding-top: 20px;
+}
+
+#filterInputFields input, #filterInputFields .bootstrap-select, #slider-range {
+	width: 100%;
+}
+
+#toolbar {
+	margin: 20px 50px 20px 20px;
+}
+
+#toolbar .title {
+	margin: 5px 5px 10px 20px;
+}
+
+#toolbar .bootstrap-select > .dropdown-toggle, #toolbar .dropdown-menu, 
+#toolbar .bootstrap-select:not([class*="col-"]):not([class*="form-control"]):not(.input-group-btn) {
+	min-width: 0px !important; 
+	width: 100px !important; 
+} 
+
+.layoutButton {
+	float: right; 
+}
+
+.colorSelectItem {
+	cursor: pointer;
+}
+
+.sections:first-child {
+	margin-top: 1%;
+}
+
+.sections {
+	background-color: #333; /*#9C004B; */
+	color: white;
+	padding-top: 1%;
+	padding-bottom: 1%;
+	border-radius: 2px; 
+	margin-top: 7%;
+	margin-bottom: 1%;
+	display: block;
+	font-size: 1.4em;
+	max-width: 50%;
+	white-space: nowrap;
+	margin-left: 2%;
+	text-align: center;
+}
+
+.backToTop{
+	float: right;
+	margin-right: 12%;
+	margin-top: -5.7%;
+	display: block;
+}
+
+
+table {
+	margin: 0px !important;
+}
+
+#colorSelector {
+	height: 58px; 
+}
+
+.title {
+	background-color: #333; /*#9C004B; */
+	color: white;
+	padding: 2px 10px;
+	border-radius: 2px; 
+	margin-top: 20px;
+	margin-bottom: 5px;
+	display: inline-block;
+}
+
+.colorFilter .closeButton {
+	float: left;
+	margin-top: 2px;
+}
+
+#detailInformationTitle {
+	font-weight: bold
+}
+
+#results {
+	padding-top: 20px;
+}
+
+#resultList {
+	margin-bottom: 20px !important;
+	background-color: #fff;
+}
+
+#resultList thead {
+	background-color: #333;
+	color: #fff;
+}
+
+#resetFiltersButton {
+	float: right;
+}
+
+#search {
+	width: 250px;
+    float: left;
+}
+
+.colorFilter .filterType {
+	display: none;
+}
+
+.resultItem {
+	width: 190px; 
+	height: 210px; 
+	margin: 40px 20px;
+	display: inline-block;
+	cursor: pointer;
+}
+
+.resultImgContainer {
+	width: 140px; 
+	height: 210px; 
+	position: relative;
+	overflow: hidden;
+	background-color: white; 
+	box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+	border-radius: 2px;
+}
+
+.resultItem img {
+	height: 100%; 
+}
+
+.noImageAvailable {
+	width: 100%;
+	height: auto !important;
+}
+.resultTitle {
+	color: #333;
+}
+
+.colorPercentageSlider {
+	width: 120px; 
+	float: right;
+	margin-top: 7px;
+}
+
+.colorPercentageValue {
+	float: right;
+    margin-right: 45px;
+}
+   
+.detailDescription {
+	font-weight: bold;
+	width: 80px;  
+}
+
+.colorSelectItem {
+	margin-bottom: 5px; 
+}
+
+.colorSelectItem, .resultColorItem, .dominantColorItem, .colorFilterColor {
+	width: 26px; 
+	height: 26px;
+	float: left;
+	border-radius: 2px; 
+	margin-right: 5px; 
+	border: 1px solid #ccc;
+}
+
+.colorFilter {
+	padding: 0px !important;
+}
+
+.colorFilterColor {
+	margin-left: 5px;
+}
+
+#colorFilter .filterType {
+	display: none;
+}
+
+.dominantColorItem {
+	margin: 0 auto; 
+}
+
+.resultColorItems {
+	position: absolute;
+	bottom: 0px;
+	right: 0px;
+	padding: 5px 0px 5px 5px; 
+	background-color: white;
+	border-radius: 2px; 
+}
+
+#moviebarcodeLogo {
+	height: 78px;
+    float: left;
+    margin: 20px 20px 0px 0px;
+}
+.detailDescription, .detailInformation, .resultTitle, .resultYear, .genreImages, .resultImgContainer {
+	float: left;
+}
+
+.genreImageContainer {
+	background: url(../images/MovieIcons.png);
+    background-repeat: no-repeat;
+    background-size: 2500%;
+    width: 50px;
+    height: 50px;
+    background-position: -50px;
+}
+
+.genreImages {
+	width: 50px;
+	height: 100%;
+}
+
+.detailInformation {
+	max-width: 460px;
+}
+
+.genreImg {
+	height: 100%;
+}
+
+.genreAction {
+	background-position: 0px;
+}
+
+.genreAdult {
+	background-position: -50px;
+}
+
+.genreAdventure {
+	background-position: -100px;
+}
+
+.genreAnimation {
+	background-position: -150px;
+}
+
+.genreBiography {
+	background-position: -200px;
+}
+
+.genreComedy {
+	background-position: -250px;
+}
+
+.genreCrime {
+	background-position: -300px;
+}
+
+.genreDocumentary {
+	background-position: -350px;
+}
+
+.genreDrama {
+	background-position: -400px;
+}
+
+.genreFamily {
+	background-position: -450px;
+}
+
+.genreFantasy {
+	background-position: -500px;
+}
+
+.genreFilm-Noir {
+	background-position: -550px;
+}
+
+.genreShort {
+	background-position: -600px;
+}
+
+.genreHorror {
+	background-position: -650px;
+}
+
+.genreHistory {
+	background-position: -700px;
+}
+
+.genreMusic {
+	background-position: -750px;
+}
+
+.genreMusical {
+	background-position: -800px;
+}
+
+.genreMystery {
+	background-position: -850px;
+}
+
+.genreRomance {
+	background-position: -950px;
+}
+
+.genreSci-Fi {
+	background-position: -1000px;
+}
+
+.genreSport {
+	background-position: -1050px;
+}
+
+.genreThriller {
+	background-position: -1100px;
+}
+
+.genreWar {
+	background-position: -1150px;
+}
+
+.genreWestern {
+	background-position: -1200px;
+}
+
+#detailInformationImage {
+	width: 100%;
+}
+
+#colorSelectItem1 {
+	background-color: red;
+}
+
+#colorSelectItem2 {
+	background-color: orange; 
+}
+
+#colorSelectItem3 {
+	background-color: yellow; 
+}
+
+#colorSelectItem4 {
+	background-color: green;
+}
+
+#colorSelectItem5 {
+	background-color: cyan; 
+}
+
+#colorSelectItem6 {
+	background-color: blue; 
+}
+
+#colorSelectItem7 {
+	background-color: magenta;
+}
+
+#colorSelectItem8 {
+	background-color: lightpink; 
+}
+
+#colorSelectItem9 {
+	background-color: white; 
+}
+
+#colorSelectItem10 {
+	background-color: darkgray;
+}
+
+#colorSelectItem11 {
+	background-color: black; 
+}
+
+#colorSelectItem12 {
+	background-color: saddlebrown; 
+}
+
+.ui-slider-range {
+    background: rgb(205, 205, 205);
+	border-radius: 0px !important;
+}
+
+.ui-slider {
+	border-radius: 2px; 
+	border: 1px solid #ccc;
+}
+
+.ui-slider-handle {
+	background: #333;
+	border-radius: 2px; 
+}
+
+.ui-slider-handle:focus {
+    outline:none;
+}
+
+.ui-slider .ui-slider-handle {
+    background: #333;
+    width: 10px;
+    height: 22px;
+    border: none;
+    cursor: pointer;
+}
+
+#loadingOverlay {
+  width: 100%; 
+  height: 100%; 
+  position: absolute; 
+  top: 0px;
+  z-index: 10;
+  display: none;
+  background-color: rgba(0, 0, 0, 0.7);
 }

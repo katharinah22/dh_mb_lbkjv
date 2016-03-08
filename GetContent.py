@@ -9,12 +9,18 @@ __author__ = 'katharina hafner'
 #                   http://moviebarcode.tumble.com/post/xxxxxxxx); if there's no
 #                   hit, search film-metadata by title
 # 19,20,21/01/16    html-code of our source-website moviebarcodes.tumblr.com
-# #                 changed -> fitting code
+#                   changed -> fitting code
 # 23/01/16          get dominant colors with ColorThief from each imagefile
 #                   store in collections
 # 27/01/16          fetching posters from omdb, storing at grid fs; changes
 #                   color thief
-
+# 29/01/16          color clustering data into mongodb
+# 02/02/16          restrict hits by removing Titles with "...[Sequence from]"
+# 19/02/16          get subtitles from OpenSubtitles.org
+# 21/02/16          insert registered UserAgent account (OpenSubtitles) + first try to format subtitles
+# 22/02/16          format subtitle string (remove unnecessary characters and numbers)
+# 24/02/16          select subtitles with the best ratings
+# 02/03/16          coordinate requests to www.opensubtitles.com
 
 import urllib.parse
 from urllib import parse
@@ -23,12 +29,23 @@ from urllib.request import urlopen
 import urllib.error
 import urllib.response
 import requests
-import re                            # Regular Expressions
-from pymongo import MongoClient      # NoSQL DB Framework
-import gridfs                        # Mongo DB Grid FS Bucket
+import re                                                       # Regular Expressions
+from pymongo import MongoClient                                 # NoSQL DB Framework
+import gridfs                                                   # Mongo DB Grid FS Bucket
 import json
-import colorthief as ct              # get dominate colors from image
-import webcolors                     # conversation rgb to hex
+# import colorthief as ct                                         # get dominant colors from image
+# import webcolors                                                # conversation rgb to hex
+from Naked.toolshed.shell import muterun_js
+import numpy as np
+
+from PIL import Image
+from colormap import rgb2hex
+import cv2
+from sklearn.cluster import KMeans
+import io                                                       # get subtitles from OpenSubtitles
+import gzip                                                     # unzip subtitles
+import base64                                                   # get subtitles from OpenSubtitles, decode base64
+from xmlrpc.client import ServerProxy
 
 try:
     from html import unescape  # python 3.4+
@@ -39,11 +56,14 @@ except ImportError:
         from HTMLParser import HTMLParser  # python 2.x
     unescape = HTMLParser().unescape
 
+from textProcessing import lemmatize
+
 
 def get_content(link):
     # Crawl Website Moviebarcodes.tumblr.com/movie-index
     response = urllib.request.urlopen(link)
     str_response = unescape(response.read().decode('utf-8'))
+
     # debugKH(str_response)
     # use inputstring
     process_file(str_response)
@@ -54,6 +74,7 @@ def process_file(file):
     # all ness. pattern
     pattern1 = re.compile('<a href=')   # Searchpattern SPLIT-Command
     pattern2 = re.compile('"/post/\d{10,12}/">.* (\(\d{4}\)|\(\d{4}-\d{4}\))')
+    p_seqfr = re.compile('\[Sequence from\]')
     p_post_id = re.compile('\d{10,12}')
     p_year = re.compile('(\(\d{4}\)|\(\d{4}-\d{4}\))')
     p_title = re.compile('>.* \(')
@@ -70,18 +91,22 @@ def process_file(file):
     # creates GridFS Bucket instance for storing image files
     fs = gridfs.GridFS(db)
 
+    # write_color_clusters_to_db(db)
+
     # split inputstream at pattern1 (<a href=)
     # search for matches (pattern2: imageid, title, year) in splitted lines
     parts = re.split(pattern1, file)
     for line in parts:
         # check if pattern matches
-        if re.search(pattern2, line):
-            # search in matched-line for db-values
+        if re.search(p_seqfr, line):
+            debugKH("No hit: " + line)     # go over titles "...[SEQUENCE FROM]"
+        elif re.search(pattern2, line):
+            # search in matched-line for valid db-values
             l_post_id = (re.search(p_post_id, line)).group(0)
             l_year = ((re.search(p_year, line)).group(0))[1:-1]    # rm 1 char from both sides of the match
             l_title = ((re.search(p_title, line)).group(0))[1:-2]  # rm 1 from left, 2 from right side
 
-            debugKH("MATCH:" + line)
+            #debugKH("MATCH:" + line)
             debugKH(" __Id: " + l_post_id + " | __Film: " + l_title + " | __Jahr: " + l_year)
 
             # fetch jpg from original url
@@ -98,13 +123,6 @@ def process_file(file):
             l_urlforimdb = 'http://moviebarcode.tumblr.com/post/' + l_post_id
             imdb_flag = 0       # =0 :Search by imdb-id at omdb-api
                                 # =1 :Search by title at omdb-api
-#            try:
-#                l_imdb_imgid = urllib.request.urlopen(l_urlforimdb)
-#                str_imdb_imgid = l_imdb_imgid.read().decode('utf-8')
-#
-#            except Exception:
-#               imdb_flag = 1
-#                pass
 
             t1 = requests.head(l_urlforimdb)
             bytes = t1.headers['location']
@@ -182,9 +200,6 @@ def process_file(file):
                 else:
                     obj = get_movie_json(l_title)
 
-                # print(obj)
-                # print(l_title)
-
                 if 'Error' not in obj:
                     l_actors, l_country, l_director, l_writer, l_genre, l_language, l_released, \
                     l_runtime, l_plot, l_imdb_rating, l_awards, l_metascore, l_imdb_votes, \
@@ -193,15 +208,18 @@ def process_file(file):
                 print(l_title, l_year, l_image, l_actors, l_country, l_director, l_writer, l_genre,
                       l_language, l_released, l_runtime, l_plot, l_imdb_rating, l_awards, l_metascore,
                       l_imdb_votes, l_type, l_rated, l_poster)
-#            """
+
             # fill mongodb
             fill_collection(db, fs, l_post_id, l_imdbid, l_title, l_year, l_image, l_actors, l_country,
                             l_director, l_writer, l_genre, l_language, l_released, l_runtime, l_plot,
                             l_imdb_rating, l_awards, l_metascore, l_imdb_votes, l_type, l_rated, l_poster)
-#            """
-            # get dominant colors of each moviebarcode-image
-            get_dominant_color(db, fs, l_post_id)
 
+            get_dominant_colors_by_colordiff(db, fs, l_post_id)
+            # online go through logic if there's no subtitle in db already
+            # {_id: "014079058735", subtitle: {$exists: False}}
+            if db.movie.count({"_id": l_post_id, "subtitle": {"$exists": False}}) or \
+                db.serie.count({"_id": l_post_id, "subtitle": {"$exists": False}}):
+                get_subtitles(db, l_post_id, l_imdbid)
             print('\n')
 
 
@@ -211,7 +229,6 @@ def urlEncodeNonAscii(b):
 
 def get_movie_json(title):
     urlTitle = urllib.parse.quote_plus(title.replace('The Complete ', ''))
-    #print("http://www.omdbapi.com/?t=" + urlTitle)
     response = urlopen("http://www.omdbapi.com/?t=" + urlTitle).read().decode('utf8')
     obj = json.loads(response)
     return obj
@@ -250,11 +267,11 @@ def fill_collection(db, fs, l_post_id, l_imdbid, l_title, l_year, l_image, l_act
                     l_runtime, l_plot, l_imdb_rating, l_awards, l_metascore,
                     l_imdb_votes, l_type, l_rated, l_poster):
     try:
-        # saves JPG and GIF of MovieBarcodes in GridFS
+        # save JPG or GIF of MovieBarcodes in GridFS
         if not fs.exists({"_id": l_post_id}):
             fs.put(urllib.request.urlopen(l_image), _id=l_post_id, filename=l_image)
 
-        # posterid
+        # save movieposter in db
         l_posterid = "P" + l_post_id
         if l_poster == "":
             debugKH("No poster!")
@@ -271,8 +288,7 @@ def fill_collection(db, fs, l_post_id, l_imdbid, l_title, l_year, l_image, l_act
         p_serie = re.compile('The Complete.*')
         if re.search(p_serie, l_title):
             if db.serie.find_one({"_id": l_post_id}):
-                debugKH(l_post_id + "(bereits vorhanden)")
-                ##update collection serie
+                debugKH(l_post_id + "already in db")
             else:
                 # it's a serie of movies
                 debugKH("SERIE:" + l_title)
@@ -312,23 +328,14 @@ def fill_collection(db, fs, l_post_id, l_imdbid, l_title, l_year, l_image, l_act
         else:
 
             if db.movie.find_one({"_id": l_post_id}):
-                debugKH(l_post_id + "(bereits vorhanden)")
-                ###
-                # db.movie.update(
-                #    {"_id": l_post_id},
-                #    {
-                #        '$set': {"moviebarcode": "abc"}
-                #    },
-                #    upsert=False
-                #)
-                ###
+                debugKH(l_post_id + "already in db")
             else:
                 db.movie.insert_one(
                     {
                         "_id": l_post_id,
                         "imdb_id": l_imdbid,
                         "title": l_title,
-                        "year": l_year,
+                        "year": int(l_year),
                         "director": l_director,
                         "writer": l_writer,
                         "actors": l_actors,
@@ -353,82 +360,156 @@ def fill_collection(db, fs, l_post_id, l_imdbid, l_title, l_year, l_image, l_act
                                 "awards": l_awards,
                                 "metascore": l_metascore,
                                 "rated": l_rated
-                            }
+                            }, 
+                        "subtitlesLemmatisation": ""
                     }
                 )
     except Exception as e:
         print('******************************Exception beim fillcollection()', e)
 
 
-def get_dominant_color(db, fs, l_post_id):
+def centroid_histogram(clt):
+    # grab the number of different clusters and create a histogram
+    # based on the number of pixels assigned to each cluster
+    numLabels = np.arange(0, len(np.unique(clt.labels_)) + 1)
+    (hist, _) = np.histogram(clt.labels_, bins=numLabels)
+
+    # normalize the histogram, such that it sums to one
+    hist = hist.astype("float")
+    hist /= hist.sum()
+
+    # return the histogram
+    return hist
+
+
+def get_dominant_colors_by_colordiff(db, fs, l_post_id):
     img_barcode = fs.get(l_post_id).read()
     my_img = open("myMovieBarcode.jpg", "wb")
     my_img.write(img_barcode)
     my_img.close()
 
-    cot = ct.ColorThief("myMovieBarcode.jpg")
-    arr_domcol = cot.get_palette()    #  9 most dominant colors in picture
+    # if image is GIF -> convert to JPEG
+    im = Image.open('myMovieBarcode.jpg')
+    if im.format =='GIF': 
+        im.convert('RGB').save('myMovieBarcode.jpg')
 
-    i = 0
-    arr_domcol_hex = []
-    for i in range(0, len(arr_domcol)):
-        arr_domcol_hex.append(webcolors.rgb_to_hex(arr_domcol[i]))
-        i = i + 1
-    store_domcol_to_db(db, l_post_id, arr_domcol_hex)
-    debugKH(arr_domcol)
+    image = cv2.imread("myMovieBarcode.jpg")
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    image = image.reshape((image.shape[0] * image.shape[1], 3))
+    clt = KMeans(n_clusters=3)
+    clt.fit(image)
+    hist = centroid_histogram(clt)
+    count = 1
+    dominant_colors = {}
+    for (percent, color) in zip(hist, clt.cluster_centers_):
+        print(percent)
+        color_R = int(color[0])
+        color_G = int(color[1])
+        color_B = int(color[2])
+        real_color = "rgb(" + str(color_R) + ", " + str(color_G) + ", " + str(color_B) + ")"
+        print(real_color) 
+        real_color_hex = rgb2hex(color_R, color_G, color_B)
+        print(real_color_hex) 
+        # response = muterun_js('colorDiffTest.js ' + str(color_R) + ' ' + str(color_G) + ' ' + str(color_B))
+        response = muterun_js('color-diff.js ' + str(color_R) + ' ' + str(color_G) + ' ' + str(color_B))
+        clustered_color = response.stdout.rstrip().decode('ascii')
+        print(clustered_color)
+        dominant_colors[str(count)] = {
+            "realcolor": real_color_hex,
+            "percent": int(percent * 100), 
+            "clusteredcolor": clustered_color
+        }
+        count += 1
+    print(dominant_colors)
+    # return dominant_colors
+    update_value_in_db(db, l_post_id, "dominantColors", dominant_colors)
 
 
-def store_domcol_to_db(db, l_post_id, arr_domcol_hex):
-    if db.movie.find_one({"_id": l_post_id}):
-        debugKH("UPDATE" + l_post_id)
+def get_subtitles(db, l_post_id, l_imdbid):
+
+    try:
+        server = ServerProxy('http://api.opensubtitles.org/xml-rpc')
+        token = server.LogIn('dh_moviebarcodes', 'dh_ws2015', 'eng', 'Moviebarcode Analyzer')['token']
+        imdb_id = int(l_imdbid[2:])
+        search_request = []
+        search_request.append({'imdbid': imdb_id, 'sublanguageid': 'eng'})
+        resp = server.SearchSubtitles(token, search_request)
+        subtitle_id = []
         try:
-            db.movie.update(
-                {"_id": l_post_id},
-                {
-                    '$set': {"dominantColors":
-                                {
-                                    "1st": arr_domcol_hex[0],
-                                    "2nd": arr_domcol_hex[1],
-                                    "3rd": arr_domcol_hex[2],
-                                    "4th": arr_domcol_hex[3],
-                                    "5th": arr_domcol_hex[4],
-                                    "6th": arr_domcol_hex[5],
-                                    "7th": arr_domcol_hex[6],
-                                    "8th": arr_domcol_hex[7],
-                                    "9th": arr_domcol_hex[8]
-                                }
-                    }
-                },
-                upsert=False
-            )
-        except Exception as e:
-            print(e)
-    elif db.serie.find_one({"_id": l_post_id}):
-        debugKH("UPDATE" + l_post_id)
-        try:
-            db.serie.update(
-                {"_id": l_post_id},
-                {
-                    '$set': {"dominantColors":
-                                {
-                                    "1st": arr_domcol_hex[0],
-                                    "2nd": arr_domcol_hex[1],
-                                    "3rd": arr_domcol_hex[2],
-                                    "4th": arr_domcol_hex[3],
-                                    "5th": arr_domcol_hex[4],
-                                    "6th": arr_domcol_hex[5],
-                                    "7th": arr_domcol_hex[6],
-                                    "8th": arr_domcol_hex[7],
-                                    "9th": arr_domcol_hex[8]
-                                }
-                    }
-                },
-                upsert=False
-            )
-        except Exception as e:
-            print(e)
-    else:
-        print("no entry for ", l_post_id)
+            sub = get_best_subtitle(resp['data'])
+            subtitle_id.append(sub['IDSubtitleFile'])
+            subtitle_data = server.DownloadSubtitles(token, subtitle_id)
+        except IndexError:
+            print("No subtitle available")
+            return ""
+        if subtitle_data['status'] == '200 OK':
+            compressed_data = subtitle_data['data'][0]['data']
+            decoded_subtitle = base64.b64decode(compressed_data)
+            # subtitle in byte format
+            decoded_subtitle = gzip.GzipFile(fileobj=io.BytesIO(decoded_subtitle)).read()
+            clean_subtitle = remove_invalid_characters(decoded_subtitle)
+            allLemmasAndMostFrequentLemmas = lemmatize(clean_subtitle)
+            print(allLemmasAndMostFrequentLemmas[0])
+            print(allLemmasAndMostFrequentLemmas[1])
+            update_value_in_db(db, l_post_id, "subtitlesLemmatisation", allLemmasAndMostFrequentLemmas[0])
+            update_value_in_db(db, l_post_id, "subtitlesMostFrequentWords", allLemmasAndMostFrequentLemmas[1])
+    except ValueError:
+        print("No subtitle available")
+
+
+# get SubtitleID with the best rating
+def get_best_subtitle(array):
+    highest_rating = 0.0
+    best_subtitle = array[0]
+    for s in array:
+        if float(s['SubRating']) > highest_rating:
+            highest_rating = float(s['SubRating'])
+            best_subtitle = s
+    return best_subtitle
+
+
+def update_value_in_db(db, l_post_id, key, value):
+        print("update_value_in_db")
+        print(value)
+        if db.movie.find_one({"_id": l_post_id}):
+            debugKH("UPDATE" + l_post_id)
+            try:
+                db.movie.update(
+                    {"_id": l_post_id},
+                    {
+                        '$set': {key: value}
+                    },
+                    upsert=False
+                )
+            except Exception as e:
+                print(e)
+        elif db.serie.find_one({"_id": l_post_id}):
+            debugKH("UPDATE" + l_post_id)
+            try:
+                db.serie.update(
+                    {"_id": l_post_id},
+                    {
+                        '$set': {key: value}
+                    },
+                    upsert=False
+                )
+            except Exception as e:
+                print(e)
+        else:
+            print("no entry for ", l_post_id)
+
+# removes numbers, special characters, control characters and tags
+def remove_invalid_characters(decoded_subtitle):
+    # convert bytes to string
+    subtitles_string = decoded_subtitle.decode("latin-1")
+    # remove html tags
+    subtitles_string = re.sub('<.*?>', '', subtitles_string)
+    # remove control characters (\n\r etc)
+    subtitles_string = re.sub(r'\s+', ' ', subtitles_string)
+    # remove numbers and special characters
+    subtitles_string = re.sub("[^a-zA-Z\']+", " ", subtitles_string)
+
+    return subtitles_string
 
 
 # commandline output katharina // ONLY TEST!

@@ -4,41 +4,282 @@
 		<meta charset="utf-8">
 
 		<title>Movie Barcodes</title>
-
-		  <link rel="stylesheet" href="res/css/style.css">
+            <link rel="stylesheet" href="libs/material-design-iconic-font/css/material-design-iconic-font.min.css">
+            <link rel="stylesheet" href="libs/silviomoreto-bootstrap-select-a8ed49e/dist/css/bootstrap-select.css">
+            <link rel="stylesheet" href="libs/bootstrap-3.3.4/css/bootstrap.min.css">
+            <link rel="stylesheet" href="libs/jquery-ui-1.11.4.custom/jquery-ui.css">
+		    <link rel="stylesheet" href="res/css/style.css">
 
 	</head>
 
 	<body>
 
-  <div class="container">
-  </div>
+        <div class="container">
+            <img id="moviebarcodeLogo" src="res/images/moviebarcodeLogo.png">
+            <h1>Moviebarcode</br>Analyzer</h1>
+            <div class="row">
+                <div id="filterInputFields" class="col-sm-6 col-md-5 col-lg-4">
+                    <div id="selectedFilters">
+                        
+                    </div>
+                    <button class="btn btn-default" id="resetFiltersButton">reset filters</button>
+                    <br class="clear" />
+                    <div class="title">title: </div>
+                    <input type="text" class="form-control" id="titleInput">
 
-  <script type="text/html" id="movieItem-tpl">
-    <div id="<%= id %>">
-      <img src="<%= poster %>" />
-      <div class="title"><%= title %></div>
-      <div class="actors">Actors: <%= actors %></div>
-      <div class="country">Country: <%= country %></div>
-      <div class="director">Director: <%= director %></div>
-      <div class="genre">Genre: <%= genre %></div>
-      <div class="language">Language: <%= language %></div>
-      <div class="year">Year: <%= year %></div>
-      <div class="runtime">Runtime: <%= runtime %></div>
-    </div>
-  </script>
+                    <div class="title">colors: </div>
+                    <div id="colorSelector" class="clear">
+                        <div class="colorSelectItem" id="colorSelectItem1" data-id="red"></div>
+                        <div class="colorSelectItem" id="colorSelectItem2" data-id="orange"></div>
+                        <div class="colorSelectItem" id="colorSelectItem3" data-id="yellow"></div>
+                        <div class="colorSelectItem" id="colorSelectItem4" data-id="green"></div>
+                        <div class="colorSelectItem" id="colorSelectItem5" data-id="cyan"></div>
+                        <div class="colorSelectItem" id="colorSelectItem6" data-id="blue"></div>
+                        <div class="colorSelectItem" id="colorSelectItem7" data-id="magenta"></div>
+                        <div class="colorSelectItem" id="colorSelectItem9" data-id="white"></div>
+                        <div class="colorSelectItem" id="colorSelectItem10" data-id="grey"></div>
+                        <div class="colorSelectItem" id="colorSelectItem11" data-id="black"></div>
+                        <div class="colorSelectItem" id="colorSelectItem12" data-id="brown"></div>
+                    </div>
+                    <div class="title">director: </div>
+                    <input type="text" class="form-control" id="directorInput">
+                    <div class="title">genre: </div>
+                    <select class="selectpicker" id="genreSelect">
+                    </select>
+                    <div class="title">year: </div>
 
-  <script src="libs/jquery-2.1.4.js"></script>
-  <script src="libs/underscore.js"></script>
-  <script src="libs/mimic_2.3/source/mimic.js"></script>
+                    <p id="sliderValue">1920 - 2016</p>
+                    <div id="slider-range"></div>
+                      
+                    <div class="title">cast: </div>
+                    <input type="text" class="form-control" id="actorInput">
+                    
+                </div>
+                <div id="resultView" class="col-sm-6 col-md-7 col-lg-9">
+                    <div id="toolbar">
+                        <div class="input-group" id="search">
+                            <input type="text" class="form-control" id="subtitleInput" placeholder="search in subtitles...">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" id="searchForWordOccurrenceButton" type="button"><span class="zmdi zmdi-search zmdi-hc-lg"></span></button>
+                            </span>
+                        </div>
 
-  <script src="src/MovieBarcodes.js"></script>
-  <script src="src/MainController.js"></script>
-  <script src="src/MainModel.js"></script>
-  <script src="src/BarcodesView.js"></script>
-  <script src="src/MovieItem.js"></script>
+                        <div class="title">sorted by: </div>
+                        <select class="selectpicker" id="sortedBySelect">
+                            <option>title</option>
+                            <option>year</option>
+                        </select>
+                        <button class="btn btn-default button ascending" id="sortDirectionToggle"><span class="zmdi zmdi-long-arrow-up zmdi-hc-lg"></span></button>
+                        <button class="btn btn-default button layoutButton" id="showResultListButton"><span class="zmdi zmdi-view-list zmdi-hc-2x"></span></button>
+                        <button class="btn btn-default button layoutButton" id="showResultModuleButton"><span class="zmdi zmdi-view-module zmdi-hc-2x"></span></button>
+                    </div>
+                    <div class="alphabeticButtonGroup">
+                      <div class="btn-toolbar">
+                        <div class="btn-group btn-group-sm letters">
+                        </div>
+                      </div>
+                    </div>
+                    <div id="results"></div>
+                </div>
+            </div>
+        </div>
 
-  <script>
-      MovieBarcodes.init();    
-  </script>
+        <div class="modal fade" id="detailInformationModal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content" id="detailInformationContainer">
+                    
+                </div>
+            </div>
+        </div>
+        <div id="loadingOverlay"></div>
+    </body>
+
+    <script type="text/html" id="resultItem-tpl">
+        <div class="resultItem" id="<%= id %>">
+            <div class="resultImgContainer">
+                <img src="<%= poster %>" />
+                <div class="resultColorItems">
+                    <div class="resultColorItem" id="resultColorItem1" style="background-color:<%= firstColor %>;"></div>      
+                    <div class="resultColorItem" id="resultColorItem2" style="background-color:<%= secondColor %>;"></div>
+                    <div class="resultColorItem" id="resultColorItem3" style="background-color:<%= thirdColor %>;"></div>
+                </div>
+            </div>
+            <div class="genreImages"></div><br class="clear"/>
+            <div class="resultTitle"><%= title %></div> <div class="resultYear"> (<%= year %>)</div>
+            <br class="clear" />
+        </div>
+    </script>
+
+    <script type="text/html" id="detailInformation-tpl">
+    
+        <div class="modal-header" id="<%= id %>">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="detailInformationTitle"><%= title %></h4>
+        </div>
+        <div class="modal-body">
+            <img id="detailInformationImage" src="<%= movieBarcode %>" />
+            <div class="title">dominant colors: </div>
+            <table class="table table-bordered" id="dominantColorsTable">
+                <thead>
+                    <tr>
+                        <th>color</th>
+                        <th>hex color</th>
+                        <th>percentage</th>
+                        <th>color name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><div class="dominantColorItem" style="background-color: <%= domCol1Value %>;"></div></td>
+                        <td><%= domCol1Value %></td>
+                        <td><%= domCol1Percentage %>%</td>
+                        <td><%= domCol1Name %></td>
+                    </tr>
+                    <tr>
+                        <td><div class="dominantColorItem" style="background-color: <%= domCol2Value %>;"></div></td>
+                        <td><%= domCol2Value %></td>
+                        <td><%= domCol2Percentage %>%</td>
+                        <td><%= domCol2Name %></td>
+                    </tr>
+                    <tr>
+                        <td><div class="dominantColorItem" style="background-color: <%= domCol3Value %>;"></div></td>
+                        <td><%= domCol3Value %></td>
+                        <td><%= domCol3Percentage %>%</td>
+                        <td><%= domCol3Name %></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="title">movie details: </div>
+            <br class="clear"/>
+
+            <div class="detailDescription">year:</div>
+            <div id="detailInformationYear" class="detailInformation"><%= year %></div>
+            <br class="clear" />
+
+            <div class="detailDescription">genre:</div>
+            <div id="detailInformationGenre" class="detailInformation"><%= genre %></div>
+            <br class="clear" />
+
+            <div class="detailDescription">director:</div>
+            <div id="detailInformationDirector" class="detailInformation"><%= director %></div>
+            <br class="clear" />
+
+            <div class="detailDescription">country:</div>
+            <div id="detailInformationCountry" class="detailInformation"><%= country %></div>
+            <br class="clear" />
+
+            <div class="detailDescription">language:</div>
+            <div id="detailInformationLanguage" class="detailInformation"><%= language %></div>
+            <br class="clear" />
+
+            <div class="detailDescription">runtime:</div>
+            <div id="detailInformationRuntime" class="detailInformation"><%= runtime %></div>
+            <br class="clear" />
+
+            <div class="detailDescription">cast:</div>
+            <div id="detailInformationActors" class="detailInformation"><%= cast %></div>
+            <br class="clear" />
+                        
+            <div class="title">plot summary: </div>
+            <div id="detailInformationSummary"><%= summary %></div>
+
+            <div class="title">Top 20 most frequent words: </div>
+            <div id="mostFrequentWords"><%= mostFrequentWords %></div>
+        </div>
+  
+    </script>
+
+    <script type="text/html" id="resultList-tpl">
+            <table class="table table-bordered" id="<%= id %>">
+                <thead>
+                    <tr>
+                        <th>colors</th>
+                        <th>title</th>
+                        <th>year</th>
+                        <th>director</th>
+                        <th>genre</th>
+                        <th>country</th>
+                    </tr>
+                </thead>
+                <tbody id="resultListItemContainer">
+                    
+                </tbody>
+            </table>
+    </script>
+
+    <script type="text/html" id="resultListItem-tpl">
+        <tr id="<%= id %>">
+            <td>
+                <div class="dominantColors">
+                    <div class="dominantColorItem" style="background-color: <%= domCol1Value %>;"></div>
+                    <div><%= domCol1Name %></div>
+                    <div><%= domCol1Percentage %>%</div>
+                </div>
+                <div class="dominantColors">
+                    <div class="dominantColorItem" style="background-color: <%= domCol2Value %>;"></div>
+                    <div><%= domCol2Name %></div>
+                    <div><%= domCol2Percentage %>%</div>
+                </div>
+                <div class="dominantColors">
+                    <div class="dominantColorItem" style="background-color: <%= domCol3Value %>;"></div>
+                    <div><%= domCol3Name %></div>
+                    <div><%= domCol3Percentage %>%</div>
+                </div>
+            </td>
+            <td><%= title %></td>
+            <td><%= year %></td>
+            <td><%= director %></td>
+            <td><%= genre %></td>
+            <td><%= country %></td>
+        </tr>
+    </script>
+
+    <script type="text/html" id="filterItem-tpl"> 
+        <div class="filter <%= filterType %>Filter" id="<%= id %>">
+            <button class="btn btn-default button closeButton">
+                <span class="zmdi zmdi-close zmdi-hc-lg"></span>
+            </button> 
+            <span class="filterType"><%= filterType %></span>: <span class="filterName"><%= filterName %></span>
+        </div>
+    </script>
+
+    <script type="text/html" id="colorFilterItem-tpl"> 
+        <div class="filter <%= filterType %>Filter" id="<%= id %>">
+            <button class="btn btn-default button closeButton">
+                <span class="zmdi zmdi-close zmdi-hc-lg"></span>
+            </button> 
+            <div class="colorFilterColor" style="background-color: <%= color %>;"></div>
+            <div class="colorPercentageSlider"></div>
+            <br class="clear" />
+            <p class="colorPercentageValue">>50%</p>
+            <br class="clear" />
+            <span class="filterType"><%= filterType %></span>
+        </div>
+    </script>
+
+    <script src="libs/jquery-2.1.4.js"></script>
+    <script src="libs/underscore.js"></script>
+    <script src="libs/jquery-ui-1.11.4.custom/jquery-ui.js"></script>
+    <script src="libs/bootstrap-3.3.4/js/bootstrap.js"></script>
+    <script src="libs/silviomoreto-bootstrap-select-a8ed49e/dist/js/bootstrap-select.js"></script>
+    <script src="libs/mimic_2.3/source/mimic.js"></script>
+    <script src="libs/spin.js"></script>
+
+    <script src="src/MovieBarcodes.js"></script>
+    <script src="src/MainController.js"></script>
+    <script src="src/MainModel.js"></script>
+    <script src="src/FilterView.js"></script>
+    <script src="src/ResultsView.js"></script>
+    <script src="src/ResultItem.js"></script>
+    <script src="src/DetailInformationItem.js"></script>
+    <script src="src/FilterItem.js"></script>
+    <script src="src/ColorFilterItem.js"></script>
+    <script src="src/ResultList.js"></script>
+    <script src="src/ResultListItem.js"></script>
+    <script src="src/AlphabeticalOverview.js"></script>
+
+    <script>
+        MovieBarcodes.init();    
+    </script>
 </html>
