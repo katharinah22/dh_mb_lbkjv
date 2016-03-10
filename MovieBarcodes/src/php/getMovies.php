@@ -184,6 +184,9 @@
         foreach ($frequencyArray as $key => $value) {
             $frequencyArray[$key] = round($value/$length);
         }
+        asort($frequencyArray);
+        $frequencyArray = array_reverse($frequencyArray);
+        ChromePhp::log($frequencyArray);
         return $frequencyArray; 
     }
 

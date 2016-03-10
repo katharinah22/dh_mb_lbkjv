@@ -6,7 +6,6 @@ MovieBarcodes.ResultsView = (function() {
 		return that; 
 	}, 
 
-//<<<<<<< HEAD
 	drawChart = function(percentages, colors) { 
 		//$("#averageColorsChart").empty();
 		console.log(percentages, colors);  
@@ -22,11 +21,22 @@ MovieBarcodes.ResultsView = (function() {
                     ticks: colors
                 }, 
                 yaxis: {
-                	max: 100
+                	max: 100, 
+                	label:'colors in %',
+          			labelRenderer: $.jqplot.CanvasAxisLabelRenderer
                 }
             }, 
             seriesColors: colors
         });
+        $('#averageColorsChart').unbind("jqplotDataClick");
+        $('#averageColorsChart').bind('jqplotDataClick', 
+            function (ev, seriesIndex, pointIndex, data) {
+            	var color = colors[pointIndex];
+            	console.log(color);
+                console.log($(".colorSelectItem[data-id='" + color + "']"));
+                $(".colorSelectItem[data-id=" + color + "]").trigger( "click" );
+            }
+  		);
 	}, 
 
 	addChart = function(domColPercentageCount) {

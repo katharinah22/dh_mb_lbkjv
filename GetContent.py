@@ -416,7 +416,7 @@ def get_dominant_colors_by_colordiff(db, fs, l_post_id):
         print(clustered_color)
         dominant_colors[str(count)] = {
             "realcolor": real_color_hex,
-            "percent": int(percent * 100), 
+            "percent": float("{0:.2f}".format(percent*100)), #int(percent * 100), 
             "clusteredcolor": clustered_color
         }
         count += 1
