@@ -94,15 +94,17 @@ body {
 .sections {
 	background-color: #333; /*#9C004B; */
 	color: white;
-	padding: 4px 200px;
+	padding-top: 1%;
+	padding-bottom: 1%;
 	border-radius: 2px; 
 	margin-top: 7%;
 	margin-bottom: 1%;
 	display: block;
 	font-size: 1.4em;
-	max-width: 20%;
+	max-width: 50%;
 	white-space: nowrap;
 	margin-left: 2%;
+	text-align: center;
 }
 
 .backToTop{

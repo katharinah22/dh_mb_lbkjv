@@ -6,6 +6,7 @@ MovieBarcodes.ResultsView = (function() {
 		return that; 
 	}, 
 
+//<<<<<<< HEAD
 	drawChart = function(percentages, colors) { 
 		//$("#averageColorsChart").empty();
 		console.log(percentages, colors);  
@@ -73,8 +74,7 @@ MovieBarcodes.ResultsView = (function() {
 
 		addChart(domColPercentageCount);
 		addTagCloud(overallMostFrequentWords); 
-
-		initAlphabeticSections(overallMostFrequentWords);
+		initSections();
 	}, 
 
 	addTagCloud = function(overallMostFrequentWords) {
@@ -89,25 +89,38 @@ MovieBarcodes.ResultsView = (function() {
 		setKeywords(words); 
 	}, 
 
-	initAlphabeticSections = function(){
-		var letters = alphabeticalOverview.countLetters(".resultTitle", true);
+	initSections = function(){
+		var sort = $("#sortedBySelect").find("option:selected").val();
+		var letters = [];
+
+		if(sort == "year") {
+			letters = alphabeticalOverview.countLetters(".resultYear", true, function(txt){
+				var year = txt.replace(/[ ()]/g, "");
+				if(year<=1850) return "<1850";
+				else if(year>1850&&year<=1900)return "1851-1900";
+				else {
+					var from = Math.floor(year/10)*10;
+					var to = ((Math.floor(year/10)+1)*10)-1;
+					return from+"-"+to;
+				}
+			});
+		} else {
+			letters = alphabeticalOverview.countLetters(".resultTitle", true);
+		}
+		createAlphabet(letters);
+		createSections(letters);
+	},
+
+	createAlphabet = function(letters){
 		createButtons(letters);
-		createSections();
 		alphabeticalOverview.addListenerToAlphabet(".alphabetButton.enabled");
 	},
 
-	createSections = function() {
-		var buchstabe = "";
-		$(".resultItem").each(function(){
-		    var l = $(this).find(".resultTitle").text()[0].toUpperCase();
-		    if(l<65 || l>90 || l=="(") {
-		    	l="#";
-		    }
-		    if(l != buchstabe){
-		        buchstabe = l;
-		        $(this).before("<div class='sections' name='alphabeticalOverview_"+ l +"'>" + l + "</div>  <button class='btn btn-default backToTop'>Back to Top</button>");
-		    }
-		});
+	createSections = function(letters) {
+		for(var l in letters){
+			var section = ("<div class='sections' name='alphabeticalOverview_"+ l +"'>" + l + "</div>  <button class='btn btn-default backToTop'>Back to Top</button>");	
+			$("div[name='alphabeticalOverview_"+l+"']").closest(".resultItem").before(section);
+		}
 		$(".backToTop").on('click', onJumpToTopClick);
 		if ($(".backToTop").length) {
 			$(".backToTop")[0].remove();
@@ -128,11 +141,12 @@ MovieBarcodes.ResultsView = (function() {
 		$('html, body').animate({ scrollTop: 0 });
 	},
 
-
-
 	loadResultListItems = function(movies, domColPercentageCount, overallMostFrequentWords) {
 		$("#resultListItemContainer").empty(); 
 		console.log(movies); 
+
+	//loadResultListItems = function(movies) {
+		$(".alphabetButton").remove();
 		for (var i = 0; i < movies.length; i++) {
 			var id = movies[i].id;
 			var title = movies[i].title; 

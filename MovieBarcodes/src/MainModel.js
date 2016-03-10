@@ -65,6 +65,7 @@ MovieBarcodes.MainModel = (function() {
 	getMoviesForListView = function(data) {
 		console.log("getMoviesForListView");
 		startSpinner(); 
+
 		$.ajax({url: "src/php/getMovies.php?command=getMoviesForListView", data: data}).done(function(data) {
 			/*var movies = jQuery.parseJSON(data);
 			console.log(movies); */
@@ -73,13 +74,15 @@ MovieBarcodes.MainModel = (function() {
 			var domColPercentageCount = object.domColPercentageCount;
 			var overallMostFrequentWords = object.overallMostFrequentWords;
 			$(that).trigger('loadResultListItems', [movies, domColPercentageCount, overallMostFrequentWords]); 
+
 			stopSpinner();
 		});
 	}, 
 
 	getAllMovies = function(data) {
 		startSpinner(); 
-		$.ajax({url: "src/php/getMovies.php?command=getAllMovies", data: data}).done(function(data) {
+		var url = "src/php/getMovies.php?command=getAllMovies";
+		$.ajax({url: url, data: data}).done(function(data) {
 			var object = jQuery.parseJSON(data);
 			var movies = object.movies; 
 			var genres = object.genres; 
@@ -99,6 +102,7 @@ MovieBarcodes.MainModel = (function() {
 			var domColPercentageCount = object.domColPercentageCount;
 			var overallMostFrequentWords = object.overallMostFrequentWords;
 			$(that).trigger('loadResults', [movies, domColPercentageCount, overallMostFrequentWords]); 
+
 			stopSpinner();
 		});
 	}, 

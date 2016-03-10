@@ -58,7 +58,10 @@ MovieBarcodes.MainController = (function() {
 
 	onLoadResults = function(event, movies, domColPercentageCount, overallMostFrequentWords) {
 		resultsView.addResults(movies, domColPercentageCount, overallMostFrequentWords); 
-	}, 
+	},
+	/*onLoadResults = function(event, movies, data) {
+		resultsView.addResults(movies, data); 
+	}, */
 
 	onLoadResultListItems = function(event, movies, domColPercentageCount, overallMostFrequentWords) {
 		resultsView.loadResultListItems(movies, domColPercentageCount, overallMostFrequentWords); 

@@ -38,7 +38,7 @@ MovieBarcodes.FilterView = (function() {
 		$("#filterInputFields input").keyup(onSubmitFilter); 
 		$("#search input").keyup(onSubmitFilter); 
 		$("#genreSelect").on('change', onGenreSelectChange); 
-		$("#sortedBySelect").on('change', onSotrBySelectChange); 
+		$("#sortedBySelect").on('change', onSortedBySelectChange); 
 		$(".colorSelectItem").on('click', onSelectColor); 
 		$("#sortDirectionToggle").on('click', onSortDirecionToggleClick); 
 		$("#resetFiltersButton").on('click', onResetFilterButtonClick); 
@@ -127,7 +127,7 @@ MovieBarcodes.FilterView = (function() {
 		}
 	}, 
 
-	onSotrBySelectChange = function(event) {
+	onSortedBySelectChange = function(event) {
 		var selected = $(this).find("option:selected").val();
 		var value = (selected == "genre") ? "storyline.genre" : selected;
 		sort["value"] = value; 

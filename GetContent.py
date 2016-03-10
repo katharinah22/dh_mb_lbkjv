@@ -20,6 +20,7 @@ __author__ = 'katharina hafner'
 # 21/02/16          insert registered UserAgent account (OpenSubtitles) + first try to format subtitles
 # 22/02/16          format subtitle string (remove unnecessary characters and numbers)
 # 24/02/16          select subtitles with the best ratings
+# 02/03/16          coordinate requests to www.opensubtitles.com
 
 import urllib.parse
 from urllib import parse
@@ -32,22 +33,19 @@ import re                                                       # Regular Expres
 from pymongo import MongoClient                                 # NoSQL DB Framework
 import gridfs                                                   # Mongo DB Grid FS Bucket
 import json
-import colorthief as ct                                         # get dominant colors from image
-import webcolors                                                # conversation rgb to hex
-from Naked.toolshed.shell import execute_js, muterun_js
-import argparse
+# import colorthief as ct                                         # get dominant colors from image
+# import webcolors                                                # conversation rgb to hex
+from Naked.toolshed.shell import muterun_js
 import numpy as np
 
 from PIL import Image
 from colormap import rgb2hex
 import cv2
 from sklearn.cluster import KMeans
-
-import struct, os                                                # get subtitles from OpenSubtitles
-import io, gzip                                                 # get subtitles from OpenSubtitles, unzip subtitles
+import io                                                       # get subtitles from OpenSubtitles
+import gzip                                                     # unzip subtitles
 import base64                                                   # get subtitles from OpenSubtitles, decode base64
-from xmlrpc.client import ServerProxy, Error
-
+from xmlrpc.client import ServerProxy
 
 try:
     from html import unescape  # python 3.4+
@@ -59,6 +57,7 @@ except ImportError:
     unescape = HTMLParser().unescape
 
 from textProcessing import lemmatize
+
 
 def get_content(link):
     # Crawl Website Moviebarcodes.tumblr.com/movie-index
@@ -124,13 +123,6 @@ def process_file(file):
             l_urlforimdb = 'http://moviebarcode.tumblr.com/post/' + l_post_id
             imdb_flag = 0       # =0 :Search by imdb-id at omdb-api
                                 # =1 :Search by title at omdb-api
-#            try:
-#                l_imdb_imgid = urllib.request.urlopen(l_urlforimdb)
-#                str_imdb_imgid = l_imdb_imgid.read().decode('utf-8')
-#
-#            except Exception:
-#               imdb_flag = 1
-#                pass
 
             t1 = requests.head(l_urlforimdb)
             bytes = t1.headers['location']
@@ -216,14 +208,18 @@ def process_file(file):
                 print(l_title, l_year, l_image, l_actors, l_country, l_director, l_writer, l_genre,
                       l_language, l_released, l_runtime, l_plot, l_imdb_rating, l_awards, l_metascore,
                       l_imdb_votes, l_type, l_rated, l_poster)
-#            '''
+
             # fill mongodb
             fill_collection(db, fs, l_post_id, l_imdbid, l_title, l_year, l_image, l_actors, l_country,
                             l_director, l_writer, l_genre, l_language, l_released, l_runtime, l_plot,
                             l_imdb_rating, l_awards, l_metascore, l_imdb_votes, l_type, l_rated, l_poster)
-#            '''
-            get_dominant_colors_by_colordiff(db, fs, l_post_id) 
-            get_subtitles(db, l_post_id, l_imdbid)
+
+            get_dominant_colors_by_colordiff(db, fs, l_post_id)
+            # online go through logic if there's no subtitle in db already
+            # {_id: "014079058735", subtitle: {$exists: False}}
+            if db.movie.count({"_id": l_post_id, "subtitle": {"$exists": False}}) or \
+                db.serie.count({"_id": l_post_id, "subtitle": {"$exists": False}}):
+                get_subtitles(db, l_post_id, l_imdbid)
             print('\n')
 
 
@@ -430,6 +426,7 @@ def get_dominant_colors_by_colordiff(db, fs, l_post_id):
 
 
 def get_subtitles(db, l_post_id, l_imdbid):
+
     try:
         server = ServerProxy('http://api.opensubtitles.org/xml-rpc')
         token = server.LogIn('dh_moviebarcodes', 'dh_ws2015', 'eng', 'Moviebarcode Analyzer')['token']
@@ -459,15 +456,17 @@ def get_subtitles(db, l_post_id, l_imdbid):
     except ValueError:
         print("No subtitle available")
 
+
 # get SubtitleID with the best rating
 def get_best_subtitle(array):
     highest_rating = 0.0
     best_subtitle = array[0]
     for s in array:
-        if float(s['SubRating'])>highest_rating:
+        if float(s['SubRating']) > highest_rating:
             highest_rating = float(s['SubRating'])
             best_subtitle = s
     return best_subtitle
+
 
 def update_value_in_db(db, l_post_id, key, value):
         print("update_value_in_db")

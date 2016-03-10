@@ -1,16 +1,16 @@
 <?php
     ini_set('default_charset', 'UTF-8');
     include_once 'ChromePhp.php';
+
     // Connect to localhost on the default port.
     $mongoDB = new Mongo();
     
+    // Get a handle on the myCollection collection,
+    // which is in the 'test' database.
     $myCollection = $mongoDB->db_moviebarcodes->movie;
     $gridFS = $mongoDB->db_moviebarcodes->getGridFS();
 
-    /*$sort = array('value'=> "title", 'sortDirection'=> 1); 
-    getAllMovies("", $sort, false); */
-    //$parameters = [{"key": "genre", "value": new MongoRegex("/Sport/")}]; 
-    //getAllMovies($parameters);
+
     switch($_GET['command']) {
         case 'getAllMovies':
             $parameters = $_GET['parameters']; 
