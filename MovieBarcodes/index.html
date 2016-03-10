@@ -5,6 +5,8 @@
 
 		<title>Movie Barcodes</title>
             <link rel="stylesheet" href="libs/material-design-iconic-font/css/material-design-iconic-font.min.css">
+            <link rel="stylesheet" href="libs/jquery.jqplot.1.0.9/jquery.jqplot.min.css">
+            <link rel="stylesheet" type="text/css" href="libs/jQCloud-master/jqcloud/jqcloud.css" />
             <link rel="stylesheet" href="libs/silviomoreto-bootstrap-select-a8ed49e/dist/css/bootstrap-select.css">
             <link rel="stylesheet" href="libs/bootstrap-3.3.4/css/bootstrap.min.css">
             <link rel="stylesheet" href="libs/jquery-ui-1.11.4.custom/jquery-ui.css">
@@ -82,7 +84,14 @@
                         </div>
                       </div>
                     </div>
-                    <div id="results"></div>
+                    <div id="top10ColorsAndKeywords">
+                        <div class="title">overall dominant colors: </div>
+                        <br class="clear" />
+                        <div id="averageColorsChart"></div>
+                        <div id="tagcloud"></div>
+                        <br class="clear" />
+                    </div>
+                    <div id="results" data-id="module"></div>
                 </div>
             </div>
         </div>
@@ -268,6 +277,11 @@
     <script src="libs/silviomoreto-bootstrap-select-a8ed49e/dist/js/bootstrap-select.js"></script>
     <script src="libs/mimic_2.3/source/mimic.js"></script>
     <script src="libs/spin.js"></script>
+    <script src="libs/jquery.jqplot.1.0.9/jquery.jqplot.js"></script>
+    <script src="libs/jquery.jqplot.1.0.9/plugins/jqplot.barRenderer.js"></script>
+    <script type="text/javascript" src="libs/jquery.jqplot.1.0.9/plugins/jqplot.categoryAxisRenderer.js"></script>
+    <script type="text/javascript" src="libs/jquery.jqplot.1.0.9/plugins/jqplot.pointLabels.js"></script>
+    <script type="text/javascript" src="libs/jQCloud-master/jqcloud/jqcloud-1.0.4.js"></script>
 
     <script src="src/MovieBarcodes.js"></script>
     <script src="src/MainController.js"></script>

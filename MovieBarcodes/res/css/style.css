@@ -21,6 +21,12 @@ body {
   	background-color: #fafafa !important;
 }
 
+#averageColorsChart {
+	width: 500px;
+	height: 250px;
+	float: left;
+}
+
 .title {
 	font-weight: bold; 
 }
@@ -169,6 +175,24 @@ table {
 	cursor: pointer;
 }
 
+#resultListItemContainer tr {
+	cursor: pointer;
+}
+
+#tagcloud span {
+	cursor: pointer;
+	color: #333;
+}
+
+#tagcloud {
+	height: 250px;
+    width: 250px;
+    text-align: center;
+    vertical-align: middle;
+    padding: 10px;
+    float: left;
+}
+
 .resultImgContainer {
 	width: 140px; 
 	height: 210px; 
@@ -187,6 +211,7 @@ table {
 	width: 100%;
 	height: auto !important;
 }
+
 .resultTitle {
 	color: #333;
 }
@@ -214,10 +239,19 @@ table {
 .colorSelectItem, .resultColorItem, .dominantColorItem, .colorFilterColor {
 	width: 26px; 
 	height: 26px;
-	float: left;
+	/*float: left;*/
 	border-radius: 2px; 
 	margin-right: 5px; 
 	border: 1px solid #ccc;
+}
+
+#colorSelector .colorSelectItem {
+	float: left;
+}
+
+.dominantColors {
+	float: left;
+	margin-right: 5px;
 }
 
 .colorFilter {
@@ -226,14 +260,20 @@ table {
 
 .colorFilterColor {
 	margin-left: 5px;
+	float: left;
 }
 
 #colorFilter .filterType {
 	display: none;
 }
 
-.dominantColorItem {
-	margin: 0 auto; 
+#resultListItemContainer td:first-of-type{
+	width: 140px; 
+	padding-right: 0px;
+}
+
+#dominantColorsTable .dominantColorItem {
+	margin: 0 auto;
 }
 
 .resultColorItems {

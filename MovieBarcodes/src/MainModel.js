@@ -51,20 +51,28 @@ MovieBarcodes.MainModel = (function() {
 
 	sortResults = function(value, sortDirection) {
 		$.ajax({url: "src/php/getMovies.php?command=sortResults", data: {value: value, sortDirection: sortDirection}}).done(function(data) {
-			var movies = jQuery.parseJSON(data);
+			//var movies = jQuery.parseJSON(data);
 			//var movies = object.movies; 
-			$(that).trigger('loadResults', [movies]); 
+			var object = jQuery.parseJSON(data);
+			var movies = object.movies; 
+			var domColPercentageCount = object.domColPercentageCount;
+			var overallMostFrequentWords = object.overallMostFrequentWords;
+			$(that).trigger('loadResults', [movies, domColPercentageCount,overallMostFrequentWords]); 
 			
 		});
 	}, 
 
-	getMoviesForListView = function() {
+	getMoviesForListView = function(data) {
 		console.log("getMoviesForListView");
 		startSpinner(); 
-		$.ajax({url: "src/php/getMovies.php?command=getMoviesForListView"}).done(function(data) {
-			var movies = jQuery.parseJSON(data);
-			console.log(movies); 
-			$(that).trigger('loadResultListItems', [movies]); 
+		$.ajax({url: "src/php/getMovies.php?command=getMoviesForListView", data: data}).done(function(data) {
+			/*var movies = jQuery.parseJSON(data);
+			console.log(movies); */
+			var object = jQuery.parseJSON(data);
+			var movies = object.movies; 
+			var domColPercentageCount = object.domColPercentageCount;
+			var overallMostFrequentWords = object.overallMostFrequentWords;
+			$(that).trigger('loadResultListItems', [movies, domColPercentageCount, overallMostFrequentWords]); 
 			stopSpinner();
 		});
 	}, 
@@ -75,7 +83,9 @@ MovieBarcodes.MainModel = (function() {
 			var object = jQuery.parseJSON(data);
 			var movies = object.movies; 
 			var genres = object.genres; 
-			$(that).trigger('loadResultsAndGenres', [movies, genres]); 
+			var domColPercentageCount = object.domColPercentageCount;
+			var overallMostFrequentWords = object.overallMostFrequentWords;
+			$(that).trigger('loadResultsAndGenres', [movies, genres, domColPercentageCount, overallMostFrequentWords]); 
 			stopSpinner();
 		});
 	}, 
@@ -83,9 +93,12 @@ MovieBarcodes.MainModel = (function() {
 	getMovies = function(data) {
 		startSpinner(); 
 		$.ajax({url: "src/php/getMovies.php?command=getMovies", data: data}).done(function(data) {
-			var movies = jQuery.parseJSON(data);
-			//var movies = object.movies; 
-			$(that).trigger('loadResults', [movies]); 
+			//var movies = jQuery.parseJSON(data);
+			var object = jQuery.parseJSON(data);
+			var movies = object.movies; 
+			var domColPercentageCount = object.domColPercentageCount;
+			var overallMostFrequentWords = object.overallMostFrequentWords;
+			$(that).trigger('loadResults', [movies, domColPercentageCount, overallMostFrequentWords]); 
 			stopSpinner();
 		});
 	}, 

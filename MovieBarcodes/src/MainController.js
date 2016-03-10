@@ -23,15 +23,16 @@ MovieBarcodes.MainController = (function() {
 		$(filterView).on('loadNewResults', onLoadNewResults); 
 		$(filterView).on('changeSorting', onChangeSorting); 
 		$(filterView).on('showResultList', onShowResultList); 
+		$(filterView).on('getMoviesForListView', onGetMoviesForListView); 
 	}, 
 
-	onGetMoviesForListView = function(event) {
+	onGetMoviesForListView = function(event, parameters) {
 		console.log("onGetMoviesForListView");
-		mainModel.getMoviesForListView(); 
+		mainModel.getMoviesForListView(parameters); 
 	}, 
 
-	onShowResultList = function(event) {
-		resultsView.addResultList(); 
+	onShowResultList = function(event, parameters) {
+		resultsView.addResultList(parameters); 
 	}, 
 
 	onShowMovieDetails = function(event, movieDetails) {
@@ -50,17 +51,17 @@ MovieBarcodes.MainController = (function() {
 		mainModel.getMovieDetails(id, title); 
 	}, 
 
-	onLoadResultsAndGenres = function(event, movies, genres) {
-		resultsView.addResults(movies); 
+	onLoadResultsAndGenres = function(event, movies, genres, domColPercentageCount, overallMostFrequentWords) {
+		resultsView.addResults(movies, domColPercentageCount, overallMostFrequentWords); 
 		filterView.loadGenreSelect(genres); 	
 	}, 
 
-	onLoadResults = function(event, movies) {
-		resultsView.addResults(movies); 
+	onLoadResults = function(event, movies, domColPercentageCount, overallMostFrequentWords) {
+		resultsView.addResults(movies, domColPercentageCount, overallMostFrequentWords); 
 	}, 
 
-	onLoadResultListItems = function(event, movies) {
-		resultsView.loadResultListItems(movies); 
+	onLoadResultListItems = function(event, movies, domColPercentageCount, overallMostFrequentWords) {
+		resultsView.loadResultListItems(movies, domColPercentageCount, overallMostFrequentWords); 
 	}, 
 
 	onLoadMovieData = function(event, poster, title, actors, country, director, genre, language, year, runtime) {

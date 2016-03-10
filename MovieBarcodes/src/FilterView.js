@@ -27,7 +27,11 @@ MovieBarcodes.FilterView = (function() {
 		    	removeFilterItemByType("year"); 
 		    	parameters.push({key: "year", value: {'gte': startValue, 'lte': endValue}}); 
 		    	var parameter = {parameters: parameters, sort: sort}; 
-    			$(that).trigger('loadNewResults', [parameter]); 
+    			if($("#results").attr("data-id") == "module") {
+					$(that).trigger('loadNewResults', [parameter]); 
+				} else {
+					$(that).trigger('getMoviesForListView', parameter); 
+				}
     			addFilterItem("year", (startValue + " - " + endValue)); 
 		    }
 		});
@@ -57,11 +61,17 @@ MovieBarcodes.FilterView = (function() {
 	}, 
 
 	onShowResultListButtonClick = function(event) {
-		$(that).trigger('showResultList');
+		var p = (parameters.length == 0) ? "" : parameters; 
+		var parameter = {parameters: p, sort: sort}; 
+		$("#resultView .alphabeticButtonGroup").hide(); 
+		$(that).trigger('showResultList', [parameter]);
 	}, 
 
 	onShowResultModuleButtonClick = function(event) {
-		adaptResults(); 
+		var p = (parameters.length == 0) ? "" : parameters; 
+		var parameter = {parameters: p, sort: sort}; 
+		$("#resultView .alphabeticButtonGroup").show(); 
+		$(that).trigger('loadNewResults', [parameter]); 
 	},
 
 	onSelectColor = function(event) {
@@ -70,7 +80,11 @@ MovieBarcodes.FilterView = (function() {
 		console.log(parameters); 
 		var parameter = {parameters: parameters, sort: sort}; 
 		addColorFilterItem("color", color); 
-    	$(that).trigger('loadNewResults', [parameter]); 
+		if($("#results").attr("data-id") == "module") {
+			$(that).trigger('loadNewResults', [parameter]); 
+		} else {
+			$(that).trigger('getMoviesForListView', parameter); 
+		}
 	},
 
 	onSubmitFilter = function(event) {
@@ -106,7 +120,11 @@ MovieBarcodes.FilterView = (function() {
 	adaptResults = function() {
 		var p = (parameters.length == 0) ? "" : parameters; 
 		var parameter = {parameters: p, sort: sort}; 
-    	$(that).trigger('loadNewResults', [parameter]);
+    	if($("#results").attr("data-id") == "module") {
+			$(that).trigger('loadNewResults', [parameter]); 
+		} else {
+			$(that).trigger('getMoviesForListView', parameter); 
+		}
 	}, 
 
 	onSotrBySelectChange = function(event) {
@@ -246,7 +264,11 @@ MovieBarcodes.FilterView = (function() {
 		    		}
 		    	}
 		    	var parameter = {parameters: parameters, sort: sort}; 
-		    	$(that).trigger('loadNewResults', [parameter]); 
+		    	if($("#results").attr("data-id") == "module") {
+					$(that).trigger('loadNewResults', [parameter]); 
+				} else {
+					$(that).trigger('getMoviesForListView', parameter); 
+				}
 		    }
 		});
 		filterItemNr++;

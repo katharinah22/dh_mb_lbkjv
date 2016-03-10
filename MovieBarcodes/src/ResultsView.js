@@ -2,11 +2,56 @@ MovieBarcodes.ResultsView = (function() {
 	var that = {}, 
 	
 	init = function() {
-
+     
 		return that; 
 	}, 
 
-	addResults = function(movies) {
+	drawChart = function(percentages, colors) { 
+		//$("#averageColorsChart").empty();
+		console.log(percentages, colors);  
+        plot2 = $.jqplot('averageColorsChart', [percentages], {
+            seriesDefaults: {
+                renderer:$.jqplot.BarRenderer,
+                pointLabels: { show: true }, 
+                rendererOptions:{ varyBarColor : true }
+            },
+            axes: {
+                xaxis: {
+                    renderer: $.jqplot.CategoryAxisRenderer,
+                    ticks: colors
+                }, 
+                yaxis: {
+                	max: 100
+                }
+            }, 
+            seriesColors: colors
+        });
+	}, 
+
+	addChart = function(domColPercentageCount) {
+		var percentages = [];
+		var colors = [];
+		$("#averageColorsChart").empty();
+		console.log(domColPercentageCount.length); 
+		if(domColPercentageCount.length != 0) {
+			for (var key in domColPercentageCount) {
+				colors.push(key);
+				percentages.push(domColPercentageCount[key]);
+			}
+	     	drawChart(percentages, colors); 
+		} 
+	},
+
+	setKeywords = function(word_list) {
+		$("#tagcloud").empty();
+	    $("#tagcloud").jQCloud(word_list, {
+	    	autoResize: true
+		  //shape: 'rectangular'
+		});
+	    //$("#tagcloud").on('click', 'span', onTagClick);
+	}, 
+
+	addResults = function(movies, domColPercentageCount, overallMostFrequentWords) {
 		console.log("ready"); 
 		$("#results").empty(); 
 		for (var i = 0; i < movies.length; i++) {
@@ -25,7 +70,23 @@ MovieBarcodes.ResultsView = (function() {
 			}
 			addResultItem(id, title, year, genre, image, firstColor, secondColor, thirdColor); 
 		}
-		initAlphabeticSections();
+
+		addChart(domColPercentageCount);
+		addTagCloud(overallMostFrequentWords); 
+
+		initAlphabeticSections(overallMostFrequentWords);
+	}, 
+
+	addTagCloud = function(overallMostFrequentWords) {
+		var words = [];
+		console.log(overallMostFrequentWords); 
+		for (var key in overallMostFrequentWords) {
+			var word = {};
+			word['text'] = key;
+			word['weight'] = overallMostFrequentWords[key];
+			words.push(word); 
+		}
+		setKeywords(words); 
 	}, 
 
 	initAlphabeticSections = function(){
@@ -69,7 +130,8 @@ MovieBarcodes.ResultsView = (function() {
 
 
 
-	loadResultListItems = function(movies) {
+	loadResultListItems = function(movies, domColPercentageCount, overallMostFrequentWords) {
+		$("#resultListItemContainer").empty(); 
 		console.log(movies); 
 		for (var i = 0; i < movies.length; i++) {
 			var id = movies[i].id;
@@ -97,6 +159,8 @@ MovieBarcodes.ResultsView = (function() {
 			var domCol3Name = domCol3['clusteredcolor'];
 			addResultListItem(id, title, year, director, genre, country, domCol1Value, domCol1Percentage, domCol1Name, domCol2Value, domCol2Percentage, domCol2Name, domCol3Value, domCol3Percentage, domCol3Name); 
 		}
+		addChart(domColPercentageCount);
+		addTagCloud(overallMostFrequentWords); 
 	}, 
 
 	onResultItemClick = function(event) {
@@ -137,6 +201,7 @@ MovieBarcodes.ResultsView = (function() {
 		if (poster == "res/images/noPosterAvailable.png") {
 			$resultItem.find("img").addClass("noImageAvailable");
 		}
+		$("#results").attr("data-id", "module");
 	}, 
 
 	makeDetailInformationItem = function(options) {
@@ -226,11 +291,12 @@ MovieBarcodes.ResultsView = (function() {
 		$("#results").empty().append($el);
 	}, 
 
-	addResultList = function() {
+	addResultList = function(parameters) {
 		makeResultList({
 			id: "resultList"
 		});
-		$(that).trigger('getMoviesForListView'); 
+		$(that).trigger('getMoviesForListView', parameters); 
+		$("#results").attr("data-id", "list");
 	}, 
 
 	makeResultListItem = function(options) {
@@ -273,6 +339,8 @@ MovieBarcodes.ResultsView = (function() {
 		    domCol3Percentage: domCol3Percentage,
 		    domCol3Name: domCol3Name
 		});
+		var $resultItem = $("#" + id); 
+		$resultItem.on('click', {'id': id, 'title': title}, onResultItemClick);
 	}; 
 
 	that.addResults = addResults; 

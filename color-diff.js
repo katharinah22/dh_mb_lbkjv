@@ -157,3 +157,26 @@ for (var i = 0; i < palette.length; i++) {
 		console.log(colorName);
 	}
 }
+
+/*function saveColorInDatabase($data, $url){
+        $picture_url = str_replace("temp","images",$url);
+        $picture = getSpecificValues("picture", "picture_url", $picture_url);
+        $pictureArray = json_decode($picture);
+        $pictureID = $pictureArray[0]->picture_id;
+        foreach ($data as $color) {
+        $specificColorRed = $color["color"]["r"];
+        $specificColorGreen = $color["color"]["g"];
+        $specificColorBlue = $color["color"]["b"];
+        $corpusColorId = $color["similar_color"]["corpus_color_id"];
+        $dbData["red"] = $specificColorRed; 
+        $dbData["green"] = $specificColorGreen; 
+        $dbData["blue"] = $specificColorBlue; 
+        $dbData["corpus_color_id"] =  $corpusColorId;
+        $dbData["picture_id"] = $pictureID;
+        $dbJSON = json_encode($dbData);
+        addValues("color", $dbJSON);
+
+    }
+
+
+}*/

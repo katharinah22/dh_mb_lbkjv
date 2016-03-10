@@ -31,13 +31,15 @@
             getAllMovies($parameters, $sort, $init);
             break; 
         case 'getMoviesForListView':
-            getMoviesForListView(); 
+            $parameters = $_GET['parameters']; 
+            $sort = $_GET['sort']; 
+            getMoviesForListView($parameters, $sort); 
             break;
         default: 
             return; 
     }
 
-    function getAllMovies($parameters, $sort, $init) {
+    function getResults($parameters, $sort) {
         global $myCollection, $gridFS; 
         $p = array(); 
         if($parameters == "") {
@@ -74,13 +76,19 @@
             ChromePhp::log($p); 
             $results = $myCollection->find($p);          
         }
-
         $results->sort(array($sort["value"] => (int) $sort["sortDirection"])); 
+        return $results;
+    }
+
+    function getAllMovies($parameters, $sort, $init) {
+        global $myCollection, $gridFS; 
+        $results = getResults($parameters, $sort);
 
         $movies = array(); 
         $genres = array(); 
         $result = array(); 
-        //$movies = "";
+        $domColPercentageCount = array(); 
+        $overallMostFrequentWords = array();
 
         $resultsLength = $results->count(); 
         $genres["all"] = $resultsLength; 
@@ -93,6 +101,14 @@
             $firstColor = $dominantColors['1']['realcolor']; 
             $secondColor = $dominantColors['2']['realcolor']; 
             $thirdColor = $dominantColors['3']['realcolor']; 
+            if(isset($movie['subtitlesMostFrequentWords'])) {
+                $subtitlesMostFrequentWords = $movie['subtitlesMostFrequentWords'];
+            } else {
+                $subtitlesMostFrequentWords = "";
+            }
+            $overallMostFrequentWords = addSubtitleToOverallMostFrequentWords($overallMostFrequentWords, $subtitlesMostFrequentWords);
+            //ChromePhp::log($overallMostFrequentWords);
+            $domColPercentageCount = addColorPercentagesToFrequency($domColPercentageCount, $dominantColors);
 
             $storyline = $movie['storyline'];
             $genre = $storyline['genre'];
@@ -120,18 +136,65 @@
             
             $movies[] = array("id"=>$id, "title"=>$title, "year"=>$year, "genre"=>$genresOfThisMovie, "poster"=>$img, "firstColor"=>$firstColor, "secondColor"=>$secondColor, "thirdColor"=>$thirdColor); 
         }
+        $overallMostFrequentWords = getTopMostFrequentWords($overallMostFrequentWords);
+        ChromePhp::log($overallMostFrequentWords);
+        $domColPercentageCount = frequencyToPercentage($domColPercentageCount, $resultsLength);
         if($init) {
-            $result = array("movies"=>$movies, "genres"=>$genres); 
+            $result = array("movies"=>$movies, "genres"=>$genres, "domColPercentageCount"=>$domColPercentageCount, "overallMostFrequentWords"=>$overallMostFrequentWords); 
         } else {
-            $result = $movies; 
+            $result = array("movies"=>$movies, "domColPercentageCount"=>$domColPercentageCount, "overallMostFrequentWords"=>$overallMostFrequentWords); 
         }
         echo json_encode($result);
     }
 
-    function getMoviesForListView() {
+    function addSubtitleToOverallMostFrequentWords($overallMostFrequentWords, $subtitlesMostFrequentWords) {
+        $mostFrequentWordsOfThisMovie = split(", ", $subtitlesMostFrequentWords);
+        for ($i = 0; $i < count($mostFrequentWordsOfThisMovie); $i++) {
+            $mostFrequentWord = split(" ", $mostFrequentWordsOfThisMovie[$i]);
+            if(count($mostFrequentWord) > 1) {
+                $mostFrequentWordName = $mostFrequentWord[0];
+                $mostFrequentWordCount = str_replace(")", "", $mostFrequentWord[1]);
+                $mostFrequentWordCount = (int) str_replace("(", "", $mostFrequentWordCount);
+                $currentMostFrequentWordCount = (array_key_exists ($mostFrequentWordName, $overallMostFrequentWords)) ? $overallMostFrequentWords[$mostFrequentWordName] : 0;
+                $overallMostFrequentWords[$mostFrequentWordName] = ($currentMostFrequentWordCount + $mostFrequentWordCount);
+            }
+        }
+        return $overallMostFrequentWords; 
+    }
+
+    function getTopMostFrequentWords($overallMostFrequentWords) {
+        asort($overallMostFrequentWords);
+        $overallMostFrequentWords = array_slice(array_reverse($overallMostFrequentWords), 0, 20);
+        //ChromePhp::log($overallMostFrequentWords);
+        return $overallMostFrequentWords;
+    }
+
+    function addColorPercentagesToFrequency($frequencyArray, $dominantColors) {
+        for ($i = 1; $i <=3; $i++) {
+            $domCol = $dominantColors[(string)$i];
+            $domColName = $domCol['clusteredcolor'];
+            $domColPercentage = $domCol['percent'];
+            $currentPercentage = (array_key_exists ($domColName, $frequencyArray)) ? $frequencyArray[$domColName] : 0;
+            $frequencyArray[$domColName] = ($currentPercentage + $domColPercentage);
+        }
+        return $frequencyArray;
+    }           
+            
+    function frequencyToPercentage($frequencyArray, $length) {
+        foreach ($frequencyArray as $key => $value) {
+            $frequencyArray[$key] = round($value/$length);
+        }
+        return $frequencyArray; 
+    }
+
+    function getMoviesForListView($parameters, $sort) {
         global $myCollection, $gridFS;
         $movies = array(); 
-        $results = $myCollection->find();
+        $result = array(); 
+        $domColPercentageCount = array(); 
+        $overallMostFrequentWords = array(); 
+        $results = getResults($parameters, $sort);
+        $resultsLength = $results->count(); 
         foreach ($results as $movie) {
             $id = $movie['_id']; 
             $title = $movie['title'];
@@ -142,11 +205,24 @@
             $details = $movie['details']; 
             $country = $details['country']; 
             $dominantColors = $movie['dominantColors'];
-
+            if(isset($movie['subtitlesMostFrequentWords'])) {
+                $subtitlesMostFrequentWords = $movie['subtitlesMostFrequentWords'];
+            } else {
+                $subtitlesMostFrequentWords = "";
+            }
+            $overallMostFrequentWords = addSubtitleToOverallMostFrequentWords($overallMostFrequentWords, $subtitlesMostFrequentWords);
+            $domColPercentageCount = addColorPercentagesToFrequency($domColPercentageCount, $dominantColors);
+            //ChromePhp::log($domColPercentageCount);
             $movies[] = array("id"=>$id, "title"=>$title, "year"=>$year, "director"=>$director, "genre"=>$genre, "country"=>$country, "dominantColors"=>$dominantColors); 
             
         }
-        echo json_encode($movies);
+        
+        $overallMostFrequentWords = getTopMostFrequentWords($overallMostFrequentWords);
+        $domColPercentageCount = frequencyToPercentage($domColPercentageCount, $resultsLength);
+        ChromePhp::log($overallMostFrequentWords);
+       // ChromePhp::log($domColPercentageCount);
+        $result = array("movies"=>$movies, "domColPercentageCount"=>$domColPercentageCount, "overallMostFrequentWords"=>$overallMostFrequentWords);
+        echo json_encode($result);
     }
 
     function getMovieDetailsByID($id) {
