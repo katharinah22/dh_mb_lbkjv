@@ -21,6 +21,8 @@
             <h1>Moviebarcode</br>Analyzer</h1>
             <div class="row">
                 <div id="filterInputFields" class="col-sm-6 col-md-5 col-lg-4">
+                    <div class="title">current filters: </div>
+                    <div id="resultsCount">no filters selected</div>
                     <div id="selectedFilters">
                         
                     </div>
@@ -82,7 +84,7 @@
                       </div>
                     </div>
                     <div id="top10ColorsAndKeywords">
-                        <div class="title">Top colors and keywords: </div>
+                        <div class="title">top colors and keywords: </div>
                         <br class="clear" />
                         <div id="averageColorsChart"></div>
                         <div id="tagcloud"></div>
@@ -193,7 +195,7 @@
             <div class="title">plot summary: </div>
             <div id="detailInformationSummary"><%= summary %></div>
 
-            <div class="title">Top 20 most frequent words: </div>
+            <div class="title">top 20 most frequent words: </div>
             <div id="mostFrequentWords"><%= mostFrequentWords %></div>
         </div>
   

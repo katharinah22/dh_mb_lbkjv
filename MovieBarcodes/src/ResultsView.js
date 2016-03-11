@@ -65,7 +65,8 @@ MovieBarcodes.ResultsView = (function() {
 	addResults = function(movies, domColPercentageCount, overallMostFrequentWords) {
 		console.log("ready"); 
 		$("#results").empty(); 
-		for (var i = 0; i < movies.length; i++) {
+		var moviesLength = movies.length;
+		for (var i = 0; i < moviesLength; i++) {
 			var id = movies[i].id;
 			var title = movies[i].title; 
 			var year = movies[i].year;
@@ -81,7 +82,7 @@ MovieBarcodes.ResultsView = (function() {
 			}
 			addResultItem(id, title, year, genre, image, firstColor, secondColor, thirdColor); 
 		}
-
+		$("#resultsCount").text(moviesLength + " results");
 		addChart(domColPercentageCount);
 		addTagCloud(overallMostFrequentWords); 
 		initSections();

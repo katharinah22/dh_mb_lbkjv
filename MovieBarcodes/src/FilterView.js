@@ -3,13 +3,15 @@ MovieBarcodes.FilterView = (function() {
 	filterItemNr, 
 	parameters,
 	sort, 
+	yearSlider, 
 	
 	init = function() {
 		//$("#titleInput").
 		filterItemNr = 0; 
 		parameters = [];
 		sort = {value: "title", sortDirection: "1"}; 
-		$("#slider-range").slider({
+		yearSlider = $("#slider-range");
+		yearSlider.slider({
 		    range: true,
 		    min: 1920,
 		    max: 2016,
@@ -26,6 +28,7 @@ MovieBarcodes.FilterView = (function() {
 		    	removeFilter("year"); 
 		    	removeFilterItemByType("year"); 
 		    	parameters.push({key: "year", value: {'gte': startValue, 'lte': endValue}}); 
+		    	$("#resetFiltersButton").show();
 		    	var parameter = {parameters: parameters, sort: sort}; 
     			if($("#results").attr("data-id") == "module") {
 					$(that).trigger('loadNewResults', [parameter]); 
@@ -56,6 +59,7 @@ MovieBarcodes.FilterView = (function() {
 		removeFilter(key); 
 		removeFilterItemByType(key); 
 		parameters.push({key: key, value: "/" + searchTerm + "/i"});
+		$("#resetFiltersButton").show();
 		adaptResults();  
     	addFilterItem(key, searchTerm); 
 	}, 
@@ -77,6 +81,7 @@ MovieBarcodes.FilterView = (function() {
 	onSelectColor = function(event) {
 		var color = "" + $(event.currentTarget).attr("data-id");
 		parameters.push({key: "color", value: {'name': color, 'gte': 50}}); 
+		$("#resetFiltersButton").show();
 		console.log(parameters); 
 		var parameter = {parameters: parameters, sort: sort}; 
 		addColorFilterItem("color", color); 
@@ -104,6 +109,7 @@ MovieBarcodes.FilterView = (function() {
 			removeFilter(key); 
 			removeFilterItemByType(key); 
 			parameters.push({key: key, value: "/" + value + "/i"}); 
+			$("#resetFiltersButton").show();
 			adaptResults();  
     		addFilterItem(key, value); 
 		}
@@ -111,10 +117,43 @@ MovieBarcodes.FilterView = (function() {
 
 	onResetFilterButtonClick = function(event) {
 		parameters = []; 
+		resetTitleInput();
+		resetGenreSelect(); 
+		resetDirectorInput();
+		resetCastInput();
+		resetYearSelect();
+		
+		$("#resultsCount").text("no filters selected");
+		$("#resetFiltersButton").hide();
 		$(".filter").each(function() {
 			$(this).remove(); 
 		});
+
 		adaptResults(); 
+	}, 
+
+	resetGenreSelect = function() {
+		var firstValue = $("#genreSelect option:first").val();
+		$("#genreSelect").val(firstValue);
+		$("#genreSelect").selectpicker('refresh');
+	}, 
+
+	resetTitleInput = function() {
+		$("#titleInput").val("");
+	}, 
+
+	resetDirectorInput = function() {
+		$("#directorInput").val("");
+	}, 
+
+	resetCastInput = function() {
+		$("#actorInput").val("");
+	}, 
+
+	resetYearSelect = function() {
+		//$("#slider-range").slider('value', [1920, 2016]);
+		yearSlider.slider('values', 0, 1920);
+		yearSlider.slider('values', 1, 2016);
 	}, 
 
 	adaptResults = function() {
@@ -140,6 +179,7 @@ MovieBarcodes.FilterView = (function() {
 		removeFilter("storyline.genre"); 
 		removeFilterItemByType("genre"); 
 		parameters.push({key: "storyline.genre", value: "/" + genre + "/"}); 
+		$("#resetFiltersButton").show();
 		adaptResults(); 
     	addFilterItem("genre", genre); 
 	}, 
