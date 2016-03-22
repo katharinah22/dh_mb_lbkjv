@@ -12,15 +12,6 @@ MovieBarcodes.DetailInformationItem = function() {
 	cast = null,
 	summary = null,
 	mostFrequentWords = null, 
-	domCol1Value = null, 
-    domCol1Percentage = null, 
-    domCol1Name = null,
-    domCol2Value = null, 
-    domCol2Percentage = null, 
-    domCol2Name = null,
-    domCol3Value = null, 
-    domCol3Percentage = null, 
-    domCol3Name = null,
 	template = null, 
 
 	init = function(options) {
@@ -36,15 +27,6 @@ MovieBarcodes.DetailInformationItem = function() {
 		cast = options.cast;
 		summary = options.summary;
 		mostFrequentWords = options.mostFrequentWords;
-		domCol1Value = options.domCol1Value; 
-	    domCol1Percentage = options.domCol1Percentage;
-	    domCol1Name = options.domCol1Name;
-	    domCol2Value = options.domCol2Value; 
-	    domCol2Percentage = options.domCol2Percentage;
-	    domCol2Name = options.domCol2Name;
-	    domCol3Value = options.domCol3Value; 
-	    domCol3Percentage = options.domCol3Percentage;
-	    domCol3Name = options.domCol3Name;
 
 		template = $('#detailInformation-tpl').html();
 		return that; 
@@ -63,16 +45,7 @@ MovieBarcodes.DetailInformationItem = function() {
 			runtime: runtime,
 			cast: cast,
 			summary: summary, 
-			mostFrequentWords: mostFrequentWords, 
-			domCol1Value: domCol1Value, 
-		    domCol1Percentage: domCol1Percentage,
-		    domCol1Name: domCol1Name,
-		    domCol2Value: domCol2Value, 
-		    domCol2Percentage: domCol2Percentage,
-		    domCol2Name: domCol2Name,
-		    domCol3Value: domCol3Value,
-		    domCol3Percentage: domCol3Percentage,
-		    domCol3Name: domCol3Name
+			mostFrequentWords: mostFrequentWords
 		});
 		return $(tpl); 
 	};

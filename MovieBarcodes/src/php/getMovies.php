@@ -45,6 +45,36 @@
         if($parameters == "") {
             $results = $myCollection->find();
         } else {
+            for($i = 0; $i < count($parameters); $i++) {
+                $parameter = $parameters[$i]; 
+                $key = $parameter['key']; 
+                if ($key == "subtitles") {
+                    $key = "subtitlesLemmatisation";
+                }
+                $value = $parameter['value']; 
+                ChromePhp::log($value); 
+                if(isset($value['gte']) && isset($value['lte'])) {
+                    $value = array('$gte' => (int) $value['gte'], '$lte' => (int) $value['lte']);
+                } else if($key == "color") {
+                    $key = "dominantColors." . $value['name'];
+                    $value = array('$gte' => (int) $value['gte']);
+                } else if ($value[0] == "/") {
+                    $value = new MongoRegex($value);
+                }   
+                $p[$key] = $value;
+            }
+            
+            ChromePhp::log($p); 
+            $results = $myCollection->find($p);          
+        }
+        $results->sort(array($sort["value"] => (int) $sort["sortDirection"])); 
+        return $results;
+
+        /*global $myCollection, $gridFS; 
+        $p = array(); 
+        if($parameters == "") {
+            $results = $myCollection->find();
+        } else {
             $and = array(); 
             for($i = 0; $i < count($parameters); $i++) {
                 $oneParameter = array(); 
@@ -77,7 +107,7 @@
             $results = $myCollection->find($p);          
         }
         $results->sort(array($sort["value"] => (int) $sort["sortDirection"])); 
-        return $results;
+        return $results;*/
     }
 
     function getAllMovies($parameters, $sort, $init) {
@@ -98,9 +128,12 @@
             $year = $movie['year'];
             $id = $movie['_id']; 
             $dominantColors = $movie['dominantColors']; 
-            $firstColor = $dominantColors['1']['realcolor']; 
-            $secondColor = $dominantColors['2']['realcolor']; 
-            $thirdColor = $dominantColors['3']['realcolor']; 
+            asort($dominantColors);
+            $dominantColors = array_slice(array_reverse($dominantColors), 0, 3);
+            $dominantColorKeys = array_keys($dominantColors);
+            $firstColor = $dominantColorKeys[0]; 
+            $secondColor = $dominantColorKeys[1]; 
+            $thirdColor = $dominantColorKeys[2]; 
             if(isset($movie['subtitlesMostFrequentWords'])) {
                 $subtitlesMostFrequentWords = $movie['subtitlesMostFrequentWords'];
             } else {
@@ -108,7 +141,7 @@
             }
             $overallMostFrequentWords = addSubtitleToOverallMostFrequentWords($overallMostFrequentWords, $subtitlesMostFrequentWords);
             //ChromePhp::log($overallMostFrequentWords);
-            $domColPercentageCount = addColorPercentagesToFrequency($domColPercentageCount, $dominantColors);
+            $domColPercentageCount = addColorPercentagesToFrequency($domColPercentageCount, $movie['dominantColors']);
 
             $storyline = $movie['storyline'];
             $genre = $storyline['genre'];
@@ -137,8 +170,9 @@
             $movies[] = array("id"=>$id, "title"=>$title, "year"=>$year, "genre"=>$genresOfThisMovie, "poster"=>$img, "firstColor"=>$firstColor, "secondColor"=>$secondColor, "thirdColor"=>$thirdColor); 
         }
         $overallMostFrequentWords = getTopMostFrequentWords($overallMostFrequentWords);
-        ChromePhp::log($overallMostFrequentWords);
+        //ChromePhp::log($overallMostFrequentWords);
         $domColPercentageCount = frequencyToPercentage($domColPercentageCount, $resultsLength);
+        //ChromePhp::log($domColPercentageCount);
         if($init) {
             $result = array("movies"=>$movies, "genres"=>$genres, "domColPercentageCount"=>$domColPercentageCount, "overallMostFrequentWords"=>$overallMostFrequentWords); 
         } else {
@@ -165,15 +199,13 @@
     function getTopMostFrequentWords($overallMostFrequentWords) {
         asort($overallMostFrequentWords);
         $overallMostFrequentWords = array_slice(array_reverse($overallMostFrequentWords), 0, 20);
-        //ChromePhp::log($overallMostFrequentWords);
         return $overallMostFrequentWords;
     }
 
     function addColorPercentagesToFrequency($frequencyArray, $dominantColors) {
-        for ($i = 1; $i <=3; $i++) {
-            $domCol = $dominantColors[(string)$i];
-            $domColName = $domCol['clusteredcolor'];
-            $domColPercentage = $domCol['percent'];
+        foreach ($dominantColors as $key => $value) {
+            $domColName = $key;
+            $domColPercentage = $value;
             $currentPercentage = (array_key_exists ($domColName, $frequencyArray)) ? $frequencyArray[$domColName] : 0;
             $frequencyArray[$domColName] = ($currentPercentage + $domColPercentage);
         }
@@ -208,6 +240,10 @@
             $details = $movie['details']; 
             $country = $details['country']; 
             $dominantColors = $movie['dominantColors'];
+            asort($dominantColors);
+            $dominantColors = array_slice(array_reverse($dominantColors), 0, 3);
+            $topDomColors = getTopDominantColors($dominantColors); 
+
             if(isset($movie['subtitlesMostFrequentWords'])) {
                 $subtitlesMostFrequentWords = $movie['subtitlesMostFrequentWords'];
             } else {
@@ -215,17 +251,28 @@
             }
             $overallMostFrequentWords = addSubtitleToOverallMostFrequentWords($overallMostFrequentWords, $subtitlesMostFrequentWords);
             $domColPercentageCount = addColorPercentagesToFrequency($domColPercentageCount, $dominantColors);
-            //ChromePhp::log($domColPercentageCount);
-            $movies[] = array("id"=>$id, "title"=>$title, "year"=>$year, "director"=>$director, "genre"=>$genre, "country"=>$country, "dominantColors"=>$dominantColors); 
+
+            $movies[] = array("id"=>$id, "title"=>$title, "year"=>$year, "director"=>$director, "genre"=>$genre, "country"=>$country, "dominantColors"=>$topDomColors); 
             
         }
         
         $overallMostFrequentWords = getTopMostFrequentWords($overallMostFrequentWords);
         $domColPercentageCount = frequencyToPercentage($domColPercentageCount, $resultsLength);
         ChromePhp::log($overallMostFrequentWords);
-       // ChromePhp::log($domColPercentageCount);
         $result = array("movies"=>$movies, "domColPercentageCount"=>$domColPercentageCount, "overallMostFrequentWords"=>$overallMostFrequentWords);
         echo json_encode($result);
+    }
+
+    function getTopDominantColors($dominantColors) {
+        $topDomColors = array();
+        $i = 0;
+        foreach ($dominantColors as $key => $value) {
+            $topDomColor["color"] = $key;
+            $topDomColor["percent"] = $value;
+            $topDomColors[$i] = $topDomColor; 
+            $i++;
+        }
+        return $topDomColors;
     }
 
     function getMovieDetailsByID($id) {
@@ -241,6 +288,10 @@
         $summary = $storyline['summary']; 
         $details = $movie['details']; 
         $dominantColors = $movie['dominantColors'];
+        asort($dominantColors);
+        $dominantColors = array_reverse($dominantColors);
+        $topDomColors = getTopDominantColors($dominantColors); 
+
         $country = $details['country']; 
         $language = $details['language']; 
         $year = $movie['year']; 
@@ -255,7 +306,7 @@
         
         $moviebarcodeData =  base64_encode($gridFS->findOne(array("_id" => $id))->getBytes());
         $image = "data:image/jpeg;base64, $moviebarcodeData";
-        $movieData = array("title"=>$title, "image"=>$image, "actors"=>$actors, "country"=>$country, "director"=>$director, "genre"=>$genre, "language"=>$language, "year"=>$year, "runtime"=>$runtime, "summary"=>$summary, "dominantColors"=>$dominantColors, "subtitlesMostFrequentWords"=>$subtitlesMostFrequentWords); 
+        $movieData = array("title"=>$title, "image"=>$image, "actors"=>$actors, "country"=>$country, "director"=>$director, "genre"=>$genre, "language"=>$language, "year"=>$year, "runtime"=>$runtime, "summary"=>$summary, "dominantColors"=>$topDomColors, "subtitlesMostFrequentWords"=>$subtitlesMostFrequentWords); 
         echo json_encode($movieData);
     }
 ?>

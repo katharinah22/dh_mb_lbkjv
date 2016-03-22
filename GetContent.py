@@ -210,16 +210,19 @@ def process_file(file):
                       l_imdb_votes, l_type, l_rated, l_poster)
 
             # fill mongodb
+            '''
             fill_collection(db, fs, l_post_id, l_imdbid, l_title, l_year, l_image, l_actors, l_country,
                             l_director, l_writer, l_genre, l_language, l_released, l_runtime, l_plot,
                             l_imdb_rating, l_awards, l_metascore, l_imdb_votes, l_type, l_rated, l_poster)
-
+            '''
             get_dominant_colors_by_colordiff(db, fs, l_post_id)
             # online go through logic if there's no subtitle in db already
             # {_id: "014079058735", subtitle: {$exists: False}}
+            '''
             if db.movie.count({"_id": l_post_id, "subtitle": {"$exists": False}}) or \
                 db.serie.count({"_id": l_post_id, "subtitle": {"$exists": False}}):
                 get_subtitles(db, l_post_id, l_imdbid)
+            '''
             print('\n')
 
 
@@ -384,15 +387,17 @@ def centroid_histogram(clt):
 
 def get_dominant_colors_by_colordiff(db, fs, l_post_id):
     img_barcode = fs.get(l_post_id).read()
-    my_img = open("myMovieBarcode.jpg", "wb")
+
+    my_img = open("myMovieBarcode.png", "wb")
     my_img.write(img_barcode)
     my_img.close()
 
     # if image is GIF -> convert to JPEG
-    im = Image.open('myMovieBarcode.jpg')
-    if im.format =='GIF': 
-        im.convert('RGB').save('myMovieBarcode.jpg')
+    im = Image.open('myMovieBarcode.png')
+    #if im.format =='GIF': 
+    im.convert('RGB').save('myMovieBarcode.png')
 
+    '''
     image = cv2.imread("myMovieBarcode.jpg")
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     image = image.reshape((image.shape[0] * image.shape[1], 3))
@@ -420,6 +425,18 @@ def get_dominant_colors_by_colordiff(db, fs, l_post_id):
             "clusteredcolor": clustered_color
         }
         count += 1
+    '''
+    response = muterun_js('color-diff.js')
+    colorString = response.stdout.rstrip().decode('ascii')
+    print(colorString)
+    dominant_colors = {}
+    colorPairs = colorString.split(', ')
+    for pair in colorPairs:
+        pairSplit = pair.split(': ')
+        color = pairSplit[0]
+        percentage = pairSplit[1]
+        dominant_colors[color] = float(percentage)
+
     print(dominant_colors)
     # return dominant_colors
     update_value_in_db(db, l_post_id, "dominantColors", dominant_colors)

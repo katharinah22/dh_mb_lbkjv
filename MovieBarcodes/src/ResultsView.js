@@ -156,7 +156,6 @@ MovieBarcodes.ResultsView = (function() {
 		$("#resultListItemContainer").empty(); 
 		console.log(movies); 
 
-	//loadResultListItems = function(movies) {
 		$(".alphabetButton").remove();
 		for (var i = 0; i < movies.length; i++) {
 			var id = movies[i].id;
@@ -167,21 +166,22 @@ MovieBarcodes.ResultsView = (function() {
 			var country = movies[i].country; 
 			var dominantColors = movies[i].dominantColors; 
 
-			var domCol1 = dominantColors['1'];
-			var domCol2 = dominantColors['2'];
-			var domCol3 = dominantColors['3'];
+			var domCol1 = dominantColors[0];
+			var domCol2 = dominantColors[1];
+			var domCol3 = dominantColors[2];
 
-			var domCol1Value = domCol1['realcolor'];
+			var domCol1Value = domCol1['color'];
 			var domCol1Percentage = domCol1['percent'];
-			var domCol1Name = domCol1['clusteredcolor'];
+			var domCol1Name = domCol1['color'];
 
-			var domCol2Value = domCol2['realcolor'];
+			var domCol2Value = domCol2['color'];
 			var domCol2Percentage = domCol2['percent'];
-			var domCol2Name = domCol2['clusteredcolor'];
+			var domCol2Name = domCol2['color'];
 
-			var domCol3Value = domCol3['realcolor'];
+			var domCol3Value = domCol3['color'];
 			var domCol3Percentage = domCol3['percent'];
-			var domCol3Name = domCol3['clusteredcolor'];
+			var domCol3Name = domCol3['color'];
+
 			addResultListItem(id, title, year, director, genre, country, domCol1Value, domCol1Percentage, domCol1Name, domCol2Value, domCol2Percentage, domCol2Name, domCol3Value, domCol3Percentage, domCol3Name); 
 		}
 		addChart(domColPercentageCount);
@@ -242,22 +242,13 @@ MovieBarcodes.ResultsView = (function() {
 			runtime: options.runtime,
 			cast: options.cast,
 			summary: options.summary, 
-			mostFrequentWords: options.mostFrequentWords, 
-			domCol1Value: options.domCol1Value,
-		    domCol1Percentage: options.domCol1Percentage,
-		    domCol1Name: options.domCol1Name,
-		    domCol2Value: options.domCol2Value,
-		    domCol2Percentage: options.domCol2Percentage,
-		    domCol2Name: options.domCol2Name,
-		    domCol3Value: options.domCol3Value,
-		    domCol3Percentage: options.domCol3Percentage,
-		    domCol3Name: options.domCol3Name
+			mostFrequentWords: options.mostFrequentWords
 		}); 
 		var $el = item.render(); 
 		$("#detailInformationContainer").empty().append($el); 
 	}, 
 
-	addDetailInformationItem = function(id, title, movieBarcode, year, genre, director, country, language, runtime, cast, summary, mostFrequentWords, domCol1Value, domCol1Percentage, domCol1Name, domCol2Value, domCol2Percentage, domCol2Name, domCol3Value, domCol3Percentage, domCol3Name) {
+	addDetailInformationItem = function(id, title, movieBarcode, year, genre, director, country, language, runtime, cast, summary, mostFrequentWords) {
 		makeDetailInformationItem({
 			id: id, 
 			title: title,
@@ -270,16 +261,7 @@ MovieBarcodes.ResultsView = (function() {
 			runtime: runtime,
 			cast: cast,
 			summary: summary, 
-			mostFrequentWords: mostFrequentWords,
-			domCol1Value: domCol1Value,
-		    domCol1Percentage: domCol1Percentage,
-		    domCol1Name: domCol1Name,
-		    domCol2Value: domCol2Value,
-		    domCol2Percentage: domCol2Percentage,
-		    domCol2Name: domCol2Name,
-		    domCol3Value: domCol3Value,
-		    domCol3Percentage: domCol3Percentage,
-		    domCol3Name: domCol3Name
+			mostFrequentWords: mostFrequentWords
 		});
 		$("#detailInformationModal").modal('show'); 
 	}, 
@@ -288,24 +270,32 @@ MovieBarcodes.ResultsView = (function() {
 		var id = "detailInformation";
 		var mostFrequentWords = movieDetails.subtitlesMostFrequentWords;
 		var dominantColors = movieDetails.dominantColors;
+		addDetailInformationItem(id, movieDetails.title, movieDetails.image, movieDetails.year, movieDetails.genre, movieDetails.director, movieDetails.country, movieDetails.language, movieDetails.runtime, movieDetails.actors, movieDetails.summary, mostFrequentWords);
+		
+		for (var i = 0; i < dominantColors.length; i++) {
+			var domCol = dominantColors[i];
+			var percentage = domCol['percent'];
+			var color = domCol['color'];
+			addDominantColorItem(percentage, color);
+		}
+	}, 
 
-		var domCol1 = dominantColors['1'];
-		var domCol2 = dominantColors['2'];
-		var domCol3 = dominantColors['3'];
+	makeDominantColorItem = function(options) {
+		var item = MovieBarcodes.DominantColorItem().init({
+			id: options.id, 
+			percentage: options.percentage, 
+			color: options.color
+		}); 
+		var $el = item.render(); 
+		$("#dominantColorsTable tbody").append($el);
+	}, 
 
-		var domCol1Value = domCol1['realcolor'];
-		var domCol1Percentage = domCol1['percent'];
-		var domCol1Name = domCol1['clusteredcolor'];
-
-		var domCol2Value = domCol2['realcolor'];
-		var domCol2Percentage = domCol2['percent'];
-		var domCol2Name = domCol2['clusteredcolor'];
-
-		var domCol3Value = domCol3['realcolor'];
-		var domCol3Percentage = domCol3['percent'];
-		var domCol3Name = domCol3['clusteredcolor'];
-
-		addDetailInformationItem(id, movieDetails.title, movieDetails.image, movieDetails.year, movieDetails.genre, movieDetails.director, movieDetails.country, movieDetails.language, movieDetails.runtime, movieDetails.actors, movieDetails.summary, mostFrequentWords, domCol1Value, domCol1Percentage, domCol1Name, domCol2Value, domCol2Percentage, domCol2Name, domCol3Value, domCol3Percentage, domCol3Name)
+	addDominantColorItem = function(percentage, color) {
+		makeDominantColorItem({
+			id: "dominantColorItem", 
+			percentage: percentage, 
+			color: color
+		});
 	}, 
 
 	makeResultList = function(options) {

@@ -121,6 +121,14 @@
         </div>
     </script>
 
+    <script type="text/html" id="dominantColorItem-tpl">
+        <tr id="<%= id %>">
+            <td><div class="dominantColorItem" style="background-color: <%= color %>;"></div></td>
+            <td><%= percentage %>%</td>
+            <td><%= color %></td>
+        </tr>
+    </script>
+
     <script type="text/html" id="detailInformation-tpl">
     
         <div class="modal-header" id="<%= id %>">
@@ -134,30 +142,11 @@
                 <thead>
                     <tr>
                         <th>color</th>
-                        <th>hex color</th>
                         <th>percentage</th>
                         <th>color name</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td><div class="dominantColorItem" style="background-color: <%= domCol1Value %>;"></div></td>
-                        <td><%= domCol1Value %></td>
-                        <td><%= domCol1Percentage %>%</td>
-                        <td><%= domCol1Name %></td>
-                    </tr>
-                    <tr>
-                        <td><div class="dominantColorItem" style="background-color: <%= domCol2Value %>;"></div></td>
-                        <td><%= domCol2Value %></td>
-                        <td><%= domCol2Percentage %>%</td>
-                        <td><%= domCol2Name %></td>
-                    </tr>
-                    <tr>
-                        <td><div class="dominantColorItem" style="background-color: <%= domCol3Value %>;"></div></td>
-                        <td><%= domCol3Value %></td>
-                        <td><%= domCol3Percentage %>%</td>
-                        <td><%= domCol3Name %></td>
-                    </tr>
                 </tbody>
             </table>
 
@@ -296,6 +285,7 @@
     <script src="src/ResultList.js"></script>
     <script src="src/ResultListItem.js"></script>
     <script src="src/AlphabeticalOverview.js"></script>
+    <script src="src/DominantColorItem.js"></script>
 
     <script>
         MovieBarcodes.init();    
